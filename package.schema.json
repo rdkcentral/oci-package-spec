@@ -64,7 +64,7 @@
       "description": "Application/Runtime type information.",
       "type": "string"
     },
-    "entrypoint": {
+    "entryPoint": {
       "description": "Path to the entry point within the package.",
       "type": "string"
     },
@@ -94,5 +94,5 @@
       "additionalProperties": true
     }
   },
-  "required": ["id", "version", "type", "entrypoint"]
+  "required": ["id", "version", "type", "entryPoint"]
 }

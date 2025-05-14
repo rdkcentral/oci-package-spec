@@ -10,7 +10,17 @@ This specification describes the metadata that is stored in a package file.
   "version": "1.2.3",
   "title": "My Application",
   "description": "A comprehensive example of package metadata.",
-  "icon": ["icon.png", "icon-1920x1024.png"],
+  "icons": [
+    {
+      "src": "icon/low-res.png",
+      "sizes": "48x48"
+    },
+    {
+      "src": "maskable_icon.png",
+      "sizes": "48x48",
+      "type": "image/png"
+    }
+  ],
   "type": "application/html",
   "entrypoint": "web/index.html",
   "dependencies": {

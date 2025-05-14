@@ -24,12 +24,34 @@
       "description": "Brief information about the package.",
       "type": "string"
     },
-    "icon": {
+    "icons": {
       "description": "Array of icon files within the package.",
       "type": "array",
       "items": {
-        "description": "Path to the icon file, relative to the package root. First entry is default.",
-        "type": "string"
+        "type": "object",
+        "properties": {
+          "src": {
+            "type": "string",
+            "description": "The path to the image file, relative to the package root."
+          },
+          "sizes": {
+            "type": "string",
+            "description": "A space-separated list of dimensions (e.g., '48x48 72x72').",
+            "pattern": "^([0-9]+x[0-9]+)(\\s[0-9]+x[0-9]+)*$"
+          },
+          "type": {
+            "type": "string",
+            "description": "The MIME type of the image (e.g., 'image/png').",
+            "pattern": "^image\\/.*$"
+          },
+          "purpose": {
+            "type": "string",
+            "description": "The purpose of the image (e.g., 'any', 'maskable', 'monochrome').",
+            "enum": ["any", "maskable", "monochrome"]
+          }
+        },
+        "required": ["src"],
+        "additionalProperties": false
       }
     },
     "type": {

@@ -8,6 +8,7 @@ This specification describes the metadata that is stored in a package file.
 {
   "id": "com.sky.myapp",
   "version": "1.2.3",
+  "version_name": "1.2.3 beta",
   "title": "My Application",
   "description": "A comprehensive example of package metadata.",
   "icons": [
@@ -122,9 +123,10 @@ This specification describes the metadata that is stored in a package file.
 ## Metadata Available per Package Type
 
 | Metadata                      | Runtime  | Application | Service  |
-| ----------------------------- | -------- | ----------- | -------- |
+|-------------------------------| -------- | ----------- | -------- |
 | [id](#id)                     | Required | Required    | Required |
 | [version](#version)           | Required | Required    | Required |
+| [versionName](#versionName)   | Optional | Optional    | Optional |
 | [title](#title)               | Optional | Optional    | Optional |
 | [icon](#icon)                 | Optional | Optional    | Optional |
 | [type](#type)                 | Required | Required    | Required |
@@ -162,9 +164,8 @@ _Examples_
 
 ## version
 
-The package version is a user readable string that represents the version of the package. There are no restrictions on
-the version except that it must not be an empty string. Typically, this is represented as a [Semantic
-Versioning](https://semver.org), but is not mandatory.
+The package version, this must consist of 1 to 4 numbers separated by periods (`.`). Numbers must not
+include a leading zero. For example, `2.01` is not allowed; however, `0.2`, `2.0.1`, and `2.10` are allowed.
 
 _Examples_
 
@@ -173,7 +174,22 @@ _Examples_
 ```
 
 ```json
-"version": "1.0.1-beta"
+"version: "0.1.20"
+```
+
+
+## versionName
+
+Optional human-readable package version string, that represents the version of the package. There are no
+restrictions on the version name, except that it if present it must not be an empty string. Typically, this
+is represented as a [Semantic Versioning](https://semver.org), but is not mandatory.
+
+If `versionName` is not present, then the `version` field is used as the version name.
+
+_Examples_
+
+```json
+"versionName": "1.0.1-beta"
 ```
 
 ## title

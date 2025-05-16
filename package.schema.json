@@ -11,7 +11,13 @@
       "pattern": "^(?!.*\\.\\.)[a-zA-Z0-9](?:[a-zA-Z0-9._-]*[a-zA-Z0-9])?$"
     },
     "version": {
-      "description": "The version is a user readable string that represents the version of the package. Typically, this is represented in SemVer format.",
+      "description": "The semantic version number of the package, this is strictly checked to ensure it contains numbers separated by periods",
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(0|[1-9][0-9]{0,8})([.](0|[1-9][0-9]{0,8})){0,3}$"
+    },
+    "versionName": {
+      "description": "Optional version of the package as a user readable string.",
       "type": "string",
       "minLength": 1
     },

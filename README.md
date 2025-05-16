@@ -8,7 +8,7 @@ This specification describes the metadata that is stored in a package file.
 {
   "id": "com.sky.myapp",
   "version": "1.2.3",
-  "versionName": "1.2.3 beta",
+  "versionName": "1.2.3-beta",
   "title": "My Application",
   "description": "A comprehensive example of package metadata.",
   "icons": [
@@ -72,13 +72,10 @@ This specification describes the metadata that is stored in a package file.
       "gpu": "128M"
     },
     "org.rdk.settings.storage": "200M",
-    "org.rdk.settings.lifecycleStates": [
-      "inactive",
-      "foreground",
-      "background",
-      "suspended",
-      "running"
-    ],
+    "org.rdk.settings.lifecycleStates": {
+      "version": "v2.0",
+      "states": ["Initializing", "Active", "Suspended"]
+    },
     "org.rdk.settings.network": {
       "public": [
         {
@@ -173,11 +170,11 @@ include a leading zero. For example, `2.01` is not allowed; however, `0.2`, `2.0
 _Examples_
 
 ```json
-"version: "1.0.0"
+"version": "1.0.0"
 ```
 
 ```json
-"version: "0.1.20"
+"version": "0.1.20"
 ```
 
 ## versionName
@@ -875,6 +872,8 @@ Set of the supported lifecycle states for the app or service. This is used as a 
 the app doesn't support deep sleep / hibernation then the system can shut down the app or service before entering deep
 sleep.
 
+App or service needs to declare whether it supports Lifecycle 1 or 2 (via `version` field) and set of corresponding supported states.
+
 Another example is if the app doesn't support lifecycle, then it would likely only support the `foreground` and
 `background` states.
 
@@ -883,17 +882,74 @@ _Object Schema_
 ```json
 "org.rdk.settings.lifecycleStates": {
   "description": "Set of the supported lifecycle states for the app or service.",
-  "type": "array",
-  "items": {
-    "type": "string",
-    "enum": [
-      "inactive",
-      "foreground",
-      "background",
-      "suspended",
-      "running"
-    ]
-  }
+  "type": "object",
+  "properties": {
+    "version": {
+      "description": "Version of the lifecycle states.",
+      "type": "string",
+      "enum": ["v1.5", "v2.0"]
+    },
+    "states": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Array of lifecycle states.  The allowed values depend on the lifecycleVersion."
+    }
+  },
+  "required": ["version", "states"],
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "version": {
+            "const": "v1.5"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "states": {
+            "items": {
+              "enum": [
+                "initializing",
+                "inactive",
+                "foreground",
+                "background",
+                "unloading",
+                "suspended"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "version": {
+            "const": "v2.0"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "states": {
+            "items": {
+              "enum": [
+                "Hibernated",
+                "Active",
+                "Paused",
+                "Suspended",
+                "Initializing"
+              ]
+            }
+          }
+        }
+      }
+    }
+  ]
 }
 ```
 
@@ -901,7 +957,21 @@ _Examples_
 
 ```json
 "settings": {
-  "org.rdk.settings.lifecycleStates": [ "inactive", "foreground", "background" ]
+  {
+    "org.rdk.settings.lifecycleStates": {
+      "version": "v1.5",
+      "states": ["inactive", "foreground", "background"]
+    }
+  }
+}
+```
+
+```json
+"settings": {
+  "org.rdk.settings.lifecycleStates": {
+    "version": "v2.0",
+    "states": ["Initializing", "Active", "Suspended"]
+  }
 }
 ```
 

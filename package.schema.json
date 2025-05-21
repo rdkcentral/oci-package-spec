@@ -88,10 +88,24 @@
       "type": "object",
       "additionalProperties": true
     },
-    "requirements": {
-      "description": "System requirements.",
+    "platform": {
+      "description": "Specifies the platform on which the package is intended to run.",
       "type": "object",
-      "additionalProperties": true
+      "properties": {
+        "architecture": {
+          "description": "The CPU architecture of the platform. Examples: 'amd64', 'arm', 'ppc64le'.",
+          "type": "string"
+        },
+        "variant": {
+          "description": "The CPU architecture variant. This field is OPTIONAL. Examples: 'v7' for ARM, 'z' for s390x.",
+          "type": "string"
+        },
+        "os": {
+          "description": "The operating system of the platform. Examples: 'linux', 'windows', 'darwin'.",
+          "type": "string"
+        }
+      },
+      "required": ["architecture", "os"]
     }
   },
   "required": ["id", "version", "type", "entryPoint"]

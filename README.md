@@ -8,7 +8,7 @@ This specification describes the metadata that is stored in a package file.
 {
   "id": "com.sky.myapp",
   "version": "1.2.3",
-  "version_name": "1.2.3 beta",
+  "versionName": "1.2.3 beta",
   "title": "My Application",
   "description": "A comprehensive example of package metadata.",
   "icons": [
@@ -25,23 +25,23 @@ This specification describes the metadata that is stored in a package file.
   "type": "application/html",
   "entryPoint": "web/index.html",
   "dependencies": {
-    "browser-runtime-package": ">=1.1.0"
+    "org.rdk.browser.wpe": ">=1.1.0"
   },
   "capabilities": [
     "org.rdk.capability.internet",
-    "org.rdk.capability.asaccess",
-    "org.rdk.capability.asplayer",
+    "org.rdk.capability.asAccess",
+    "org.rdk.capability.asPlayer",
     "org.rdk.capability.firebolt",
     "org.rdk.capability.thunder",
     "org.rdk.capability.mediarite",
     "org.rdk.capability.rialto",
-    "org.rdk.capability.airplay",
-    "org.rdk.capability.gamecontroller",
-    "org.rdk.capability.timeshiftbuffer",
-    "org.rdk.capability.readexternalstorage",
-    "org.rdk.capability.writeexternalstorage",
-    "org.rdk.capability.displayoverlay",
-    "org.rdk.capability.homeapp",
+    "org.rdk.capability.airPlay",
+    "org.rdk.capability.gameController",
+    "org.rdk.capability.timeShiftBuffer",
+    "org.rdk.capability.readExternalStorage",
+    "org.rdk.capability.writeExternalStorage",
+    "org.rdk.capability.displayOverlay",
+    "org.rdk.capability.homeApp",
     "org.rdk.capability.compositor"
   ],
   "settings": {
@@ -66,22 +66,20 @@ This specification describes the metadata that is stored in a package file.
       "soundMode": "surround",
       "soundScene": "cinema",
       "soundLevel": -5
-    }
-  },
-  "requirements": {
-    "org.rdk.requirement.memory": {
+    },
+    "org.rdk.settings.memory": {
       "system": "256M",
       "gpu": "128M"
     },
-    "org.rdk.requirement.storage": "200M",
-    "org.rdk.requirement.lifecycleStates": [
+    "org.rdk.settings.storage": "200M",
+    "org.rdk.settings.lifecycleStates": [
       "inactive",
       "foreground",
       "background",
       "suspended",
       "running"
     ],
-    "org.rdk.requirement.network": {
+    "org.rdk.settings.network": {
       "public": [
         {
           "name": "media-stream",
@@ -108,14 +106,19 @@ This specification describes the metadata that is stored in a package file.
         "port": 1900
       }
     },
-    "org.rdk.requirement.timeouts": {
+    "org.rdk.settings.timeouts": {
       "startupSeconds": 60,
       "watchdogSeconds": 30
     },
-    "org.rdk.requirement.drmSupport": [
+    "org.rdk.settings.drmSupport": [
       "com.widevine.alpha",
       "com.microsoft.playready"
     ]
+  },
+  "platform": {
+    "architecture": "arm",
+    "variant": "v7",
+    "os": "linux"
   }
 }
 ```
@@ -123,7 +126,7 @@ This specification describes the metadata that is stored in a package file.
 ## Metadata Available per Package Type
 
 | Metadata                      | Runtime  | Application | Service  |
-|-------------------------------| -------- | ----------- | -------- |
+| ----------------------------- | -------- | ----------- | -------- |
 | [id](#id)                     | Required | Required    | Required |
 | [version](#version)           | Required | Required    | Required |
 | [versionName](#versionName)   | Optional | Optional    | Optional |
@@ -132,9 +135,9 @@ This specification describes the metadata that is stored in a package file.
 | [type](#type)                 | Required | Required    | Required |
 | [entryPoint](#entryPoint)     | Required | Required    | Required |
 | [dependencies](#dependencies) | Optional | Optional    | Optional |
-| [capabilities](#capabilities) | Disabled | Required    | Required |
+| [capabilities](#capabilities) | Disabled | Optional    | Optional |
 | [settings](#settings)         | Optional | Optional    | Optional |
-| [requirements](#requirements) | Optional | Optional    | Optional |
+| [platform](#platform)         | Optional | Optional    | Optional |
 
 ## id
 
@@ -176,7 +179,6 @@ _Examples_
 ```json
 "version: "0.1.20"
 ```
-
 
 ## versionName
 
@@ -223,9 +225,13 @@ A package can have one of the following category types:
   a runnable application.
 - `service/` - A package that contains a service, which is an application that runs in the background. Likewise for
   applications, a service may be combined with a runtime to form a runnable service.
+- `resource/` - A package that contains resources, eg. certificates, translations, ML model.
 
 This field has double purpose, it's simply identifies the type of the package and it is used for associating an app
 or service package with a runtime package.
+
+Depending on the `type` some of the device capabilities are implicitly requested, eg. `application` needs to render
+graphics, which is not the case for `service` or `resource`.
 
 ### runtime
 
@@ -247,11 +253,12 @@ _Examples_
 "type": "runtime/python"
 ```
 
-### application/service
+### application/service/resource
 
-For `application/` and `service/` packages this field is used to describe which runtime the app or service requires to run.
-As with `runtime/` packages, this is a string formatted like a mime type, but should start with `application/`, e.g.
-`application/html`.
+For `application/` and `service/` packages this field is used to describe which runtime the app or service requires to run,
+either it is a downloadable runtime package or the runtime is the part of device firmware. As with `runtime/` packages,
+this is a string formatted like a mime type, but should started with `application/`, e.g. `application/html`.
+The type `resource/` indicates that package does not require runtime, its just need to be extracted somewher in FS.
 
 _Examples_
 
@@ -264,7 +271,17 @@ _Examples_
 ```
 
 ```json
-"type": "application/python"
+"type": "service/system"
+```
+
+```json
+"type": "resource/data"
+```
+
+or
+
+```json
+"type": "resource/model"
 ```
 
 Currently, to match an app with a service, the system just strips off the `application/` or `runtime/` prefix and compares
@@ -524,6 +541,12 @@ Settings object consist package specific settings.
 | [org.rdk.settings.inputHandling](#org.rdk.settings.inputHandling)     | Disabled | Optional    | Disabled |
 | [org.rdk.settings.displayInfo](#org.rdk.settings.displayInfo)         | Disabled | Optional    | Disabled |
 | [org.rdk.settings.audioInfo](#org.rdk.settings.audioInfo)             | Disabled | Optional    | Disabled |
+| [org.rdk.settings.memory](#org.rdk.settings.memory)                   | Disabled | Optional    | Optional |
+| [org.rdk.settings.storage](#org.rdk.settings.storage)                 | Disabled | Optional    | Optional |
+| [org.rdk.settings.lifecycleStates](#org.rdk.settings.lifecycleStates) | Disabled | Optional    | Optional |
+| [org.rdk.settings.network](#org.rdk.settings.network)                 | Disabled | Optional    | Optional |
+| [org.rdk.settings.timeouts](#org.rdk.settings.timeouts)               | Disabled | Optional    | Optional |
+| [org.rdk.settings.drmSupport](#org.rdk.settings.drmSupport)           | Disabled | Optional    | Optional |
 
 \*) List is extensible
 
@@ -782,22 +805,7 @@ _Examples_
 }
 ```
 
-## requirements
-
-Requirements object consist package specific system requirements.
-
-| Requirements \*)                                                            | Runtime  | Application | Service  |
-| --------------------------------------------------------------------------- | -------- | ----------- | -------- |
-| [org.rdk.requirement.memory](#org.rdk.requirement.memory)                   | Disabled | Optional    | Optional |
-| [org.rdk.requirement.storage](#org.rdk.requirement.storage)                 | Disabled | Optional    | Optional |
-| [org.rdk.requirement.lifecycleStates](#org.rdk.requirement.lifecycleStates) | Disabled | Optional    | Optional |
-| [org.rdk.requirement.network](#org.rdk.requirement.network)                 | Disabled | Optional    | Optional |
-| [org.rdk.requirement.timeouts](#org.rdk.requirement.timeouts)               | Disabled | Optional    | Optional |
-| [org.rdk.requirement.drmSupport](#org.rdk.requirement.drmSupport)           | Disabled | Optional    | Optional |
-
-\*) List is extensible
-
-### org.rdk.requirement.memory
+### org.rdk.settings.memory
 
 The requested memory quota for the app or service. This is optional and used as a hint to the system about the required
 memory usage. The system may use this to determine when to run the app or service, or to apply limits on the memory
@@ -811,7 +819,7 @@ usage.
 _Object Schema_
 
 ```json
-"org.rdk.requirement.memory": {
+"org.rdk.settings.memory": {
   "description": "Memory quota. Value can be specified with G, M, or B suffix. If no suffix is provided, the value is assumed to be in bytes.",
   "type": "object",
   "properties": {
@@ -830,15 +838,15 @@ _Object Schema_
 _Examples_
 
 ```json
-"requirements": {
-  "org.rdk.requirement.memory": {
+"settings": {
+  "org.rdk.settings.memory": {
     "system": "256M",
     "gpu": "128M"
   }
 }
 ```
 
-### org.rdk.requirement.storage
+### org.rdk.settings.storage
 
 The requested storage quota for the app or service (in MB). This is optional and used as a hint to the system about the
 amount of storage for the app or service.
@@ -846,7 +854,7 @@ amount of storage for the app or service.
 _Object Schema_
 
 ```json
-"org.rdk.requirement.storage": {
+"org.rdk.settings.storage": {
   "description": "Storage quota. Value can be specified with G, M, or B suffix. If no suffix is provided, the value is assumed to be in bytes.",
   "type": "string",
   "pattern": "^\\d+[GMB]?$",
@@ -856,12 +864,12 @@ _Object Schema_
 _Examples_
 
 ```json
-"requirements": {
-  "org.rdk.requirement.storage": "32M"
+"settings": {
+  "org.rdk.settings.storage": "32M"
 }
 ```
 
-### org.rdk.requirement.lifecycleStates
+### org.rdk.settings.lifecycleStates
 
 Set of the supported lifecycle states for the app or service. This is used as a hint to the system, for example if
 the app doesn't support deep sleep / hibernation then the system can shut down the app or service before entering deep
@@ -873,7 +881,7 @@ Another example is if the app doesn't support lifecycle, then it would likely on
 _Object Schema_
 
 ```json
-"org.rdk.requirement.lifecycleStates": {
+"org.rdk.settings.lifecycleStates": {
   "description": "Set of the supported lifecycle states for the app or service.",
   "type": "array",
   "items": {
@@ -892,12 +900,12 @@ _Object Schema_
 _Examples_
 
 ```json
-"requirements": {
-  "org.rdk.requirement.lifecycleStates": [ "inactive", "foreground", "background" ]
+"settings": {
+  "org.rdk.settings.lifecycleStates": [ "inactive", "foreground", "background" ]
 }
 ```
 
-### org.rdk.requirement.network
+### org.rdk.settings.network
 
 And app or service can request access to or expose a network services. Network services are divided into three
 categories:
@@ -922,7 +930,7 @@ It's up to the app or service to actually listen on the ports and handle the net
 _Object Schema_
 
 ```json
-"org.rdk.requirement.network": {
+"org.rdk.settings.network": {
   "description": "Network services configuration.",
   "type": "object",
   "properties": {
@@ -969,8 +977,8 @@ _Object Schema_
 _Examples_
 
 ```json
-"requirements": {
-  "org.rdk.requirement.network": {
+"settings": {
+  "org.rdk.settings.network": {
     "public": [
       {
         "name": "netflix-mdx",
@@ -996,7 +1004,7 @@ _Examples_
 }
 ```
 
-### org.rdk.requirement.timeouts
+### org.rdk.settings.timeouts
 
 Defines the timeouts for the app or service startup and watchdog.
 
@@ -1009,7 +1017,7 @@ Defines the timeouts for the app or service startup and watchdog.
 _Object Schema_
 
 ```json
-"org.rdk.requirement.timeouts": {
+"org.rdk.settings.timeouts": {
   "description": "Startup and watchdog timeouts.",
   "type": "object",
   "properties": {
@@ -1023,15 +1031,15 @@ _Object Schema_
 _Examples_
 
 ```json
-"requirements": {
-  "org.rdk.requirement.timeouts": {
+"settings": {
+  "org.rdk.settings.timeouts": {
     "startupTimeoutSeconds": 60,
     "watchdogTimeoutSeconds": 30
   }
 }
 ```
 
-### org.rdk.requirement.drmSupport
+### org.rdk.settings.drmSupport
 
 A set of DRM systems that the app or service supports / requires. This is optional and used as a hint to the system about the DRM systems that the app or service requires.
 
@@ -1042,7 +1050,7 @@ Currently each DRM type is listed as a free from string, but in the future this 
 _Object Schema_
 
 ```json
-"org.rdk.requirement.drmSupport": {
+"org.rdk.settings.drmSupport": {
   "description": "Supported DRM systems.",
   "type": "array",
   "items": { "type": "string" }
@@ -1053,7 +1061,107 @@ _Object Schema_
 _Examples_
 
 ```json
-"requirements": {
-  "org.rdk.requirement.drmSupport": [ "org.w3.clearkey", "com.microsoft.playready" ]
+"settings": {
+  "org.rdk.settings.drmSupport": [ "org.w3.clearkey", "com.microsoft.playready" ]
+}
+```
+
+## platform
+
+This OPTIONAL object specifies the platform on which the package is intended to run.
+This object is complaint with corresponding object in [OCI Index](https://github.com/opencontainers/image-spec/blob/main/image-index.md#image-index-property-descriptions) and [OCI Image Config](https://github.com/opencontainers/image-spec/blob/main/config.md#properties).
+
+In RDK environment the values that will be used:
+
+- `architecture` - `arm`, `arm64`
+- `variant` - `v7`, `v8`, ...
+- `os` - `linux`
+
+- #### architecture REQUIRED
+
+  The CPU architecture which the binaries in this package are built to run on.
+  Configurations SHOULD use, and implementations SHOULD understand.
+
+  Choices for `architecture` are:
+
+  - `amd64` (64-bit x86, the most mature port),
+  - `386` (32-bit x86), arm (32-bit ARM),
+  - `arm64` (64-bit ARM),
+  - `ppc64le` (PowerPC 64-bit, little-endian),
+  - `ppc64` (PowerPC 64-bit, big-endian),
+  - `mips64le` (MIPS 64-bit, little-endian),
+  - `mips64` (MIPS 64-bit, big-endian),
+  - `mipsle` (MIPS 32-bit, little-endian),
+  - `mips` (MIPS 32-bit, big-endian),
+  - `s390x` (IBM System z 64-bit, big-endian),
+  - `wasm` (WebAssembly 32-bit),
+  - `riscv64` (RISC-V).
+
+- #### variant OPTIONAL
+
+  The variant of the specified CPU architecture. Configurations SHOULD use, and implementations SHOULD understand,
+  variant values listed in the Platform Variants table.
+
+  | ISA/ABI    | architecture | variant           |
+  | ---------- | ------------ | ----------------- |
+  | ARM 32-bit | arm          | v6 v7, v8         |
+  | ARM 64-bit | arm64        | v8, v8.1, …       |
+  | POWER8+    | ppc64le      | power8, power9, … |
+  | RISC-V     | riscv64      | rva20u64, …       |
+  | x86-64     | amd64        | v1, v2, v3, …     |
+
+- #### os REQUIRED
+
+  The name of the operating system which the package is built to run on. Configurations SHOULD use, and implementations
+  SHOULD understand.
+
+  Choices for `os` are:
+
+  - `android`,
+  - `darwin`,
+  - `dragonfly`,
+  - `freebsd`,
+  - `illumos`,
+  - `ios`,
+  - `js`,
+  - `linux`,
+  - `netbsd`,
+  - `openbsd`,
+  - `plan9`,
+  - `solaris`,
+  - `wasip1`,
+  - `windows`.
+
+_Object Schema_
+
+```json
+"platform": {
+  "description": "Specifies the platform on which the package is intended to run.",
+  "type": "object",
+  "properties": {
+    "architecture": {
+      "description": "The CPU architecture of the platform. Examples: 'amd64', 'arm', 'ppc64le'.",
+      "type": "string"
+    },
+    "variant": {
+      "description": "The CPU architecture variant. This field is OPTIONAL. Examples: 'v7' for ARM, 'z' for s390x.",
+      "type": "string"
+    },
+    "os": {
+      "description": "The operating system of the platform. Examples: 'linux', 'windows', 'darwin'.",
+      "type": "string"
+    }
+  },
+  "required": ["architecture", "os"]
+}
+```
+
+_Examples_
+
+```json
+"platform": {
+  "architecture": "arm",
+  "variant": "v7",
+  "os": "linux"
 }
 ```

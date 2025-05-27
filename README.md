@@ -25,58 +25,69 @@ This specification describes the metadata that is stored in a package file.
   "type": "application/html",
   "entryPoint": "web/index.html",
   "dependencies": {
-    "org.rdk.browser.wpe": ">=1.1.0"
+    "rdk.browser.wpe": ">=1.1.0"
   },
-  "capabilities": [
-    "org.rdk.capability.internet",
-    "org.rdk.capability.asAccess",
-    "org.rdk.capability.asPlayer",
-    "org.rdk.capability.firebolt",
-    "org.rdk.capability.thunder",
-    "org.rdk.capability.mediarite",
-    "org.rdk.capability.rialto",
-    "org.rdk.capability.airPlay",
-    "org.rdk.capability.gameController",
-    "org.rdk.capability.timeShiftBuffer",
-    "org.rdk.capability.readExternalStorage",
-    "org.rdk.capability.writeExternalStorage",
-    "org.rdk.capability.displayOverlay",
-    "org.rdk.capability.homeApp",
-    "org.rdk.capability.compositor"
+  "permissions": [
+    "urn:rdk:permission.internet",
+    "urn:rdk:permission:firebolt",
+    "urn:rdk:permission:thunder",
+    "urn:rdk:permission:mediarite",
+    "urn:rdk:permission:rialto",
+    "urn:rdk:permission:airplay",
+    "urn:rdk:permission:compositor",
+    "urn:rdk:permission:game-controller",
+    "urn:entos:permission:timeshift-buffer",
+    "urn:entos:permission:read-external-storage",
+    "urn:entos:permission:write-external-storage",
+    "urn:entos:permission:display-overlay",
+    "urn:entos:permission:home-app",
+    "urn:entos:permissionr:as-access",
+    "urn:entos:permissior:as-player"
   ],
   "settings": {
-    "org.rdk.settings.logLevels": ["error", "warning", "info"],
-    "org.rdk.settings.parentPackageId": "com.sky.parentapp",
-    "org.rdk.settings.skyLiveApp": true,
-    "org.rdk.settings.dial": {
+    "urn:rdk:settings:log-levels": ["error", "warning", "info"],
+    "urn:entos:settings:parent-package-id": "com.sky.parentapp",
+    "unt:entos:settings:sky-live-app": true,
+    "urn:rdk:settings:dial": {
       "appNames": ["MyMediaApp", "MediaRemote"],
       "corsDomains": ["http://example.com", "https://my-media.com"],
       "originHeaderRequired": true
     },
-    "org.rdk.settings.inputHandling": {
+    "urn:rdk:settings:lifecycle-states": {
+      "version": "v2.0",
+      "states": ["Initializing", "Active", "Suspended"]
+    },
+    "urn:rdk:settings:timeouts": {
+      "startupSeconds": 60,
+      "watchdogSeconds": 30
+    }
+  },
+  "requirements": {
+    "urn:rdk:requirement:platform": {
+      "architecture": "arm",
+      "variant": "v7",
+      "os": "linux"
+    },
+    "urn:rdk:requirement:input-handling": {
       "keyCapture": ["play", "pause", "stop", "fastForward", "rewind"],
       "keyMonitor": ["volumeUp", "volumeDown", "mute"]
     },
-    "org.rdk.settings.displayInfo": {
+    "urn:rdk:requirement:display-info": {
       "virtualSize": 1080,
       "refreshRate": 60,
       "pictureMode": "hdr10"
     },
-    "org.rdk.settings.audioInfo": {
+    "urn:rdk.requirement.audio-info": {
       "soundMode": "surround",
       "soundScene": "cinema",
       "soundLevel": -5
     },
-    "org.rdk.settings.memory": {
+    "urn:rdk:requirement:memory": {
       "system": "256M",
       "gpu": "128M"
     },
-    "org.rdk.settings.storage": "200M",
-    "org.rdk.settings.lifecycleStates": {
-      "version": "v2.0",
-      "states": ["Initializing", "Active", "Suspended"]
-    },
-    "org.rdk.settings.network": {
+    "urn:rdk:requirement:storage": "200M",
+    "urn:rdk:requirement:network": {
       "public": [
         {
           "name": "media-stream",
@@ -103,19 +114,10 @@ This specification describes the metadata that is stored in a package file.
         "port": 1900
       }
     },
-    "org.rdk.settings.timeouts": {
-      "startupSeconds": 60,
-      "watchdogSeconds": 30
-    },
-    "org.rdk.settings.drmSupport": [
+    "urn:rdk:requirement:drm-support": [
       "com.widevine.alpha",
       "com.microsoft.playready"
     ]
-  },
-  "platform": {
-    "architecture": "arm",
-    "variant": "v7",
-    "os": "linux"
   }
 }
 ```
@@ -132,8 +134,9 @@ This specification describes the metadata that is stored in a package file.
 | [type](#type)                 | Required | Required    | Required |
 | [entryPoint](#entryPoint)     | Required | Required    | Required |
 | [dependencies](#dependencies) | Optional | Optional    | Optional |
-| [capabilities](#capabilities) | Disabled | Optional    | Optional |
+| [permissions](#permissions)   | Disabled | Optional    | Optional |
 | [settings](#settings)         | Optional | Optional    | Optional |
+| [requirements](#requirements) | Optional | Optional    | Optional |
 | [platform](#platform)         | Optional | Optional    | Optional |
 
 ## id
@@ -159,7 +162,7 @@ _Examples_
 ```
 
 ```json
-"id": "org.rdk.wpebrowser"
+"id": "rdk.browser.wpe"
 ```
 
 ## version
@@ -334,7 +337,7 @@ _Examples_
 
 ```json
 "dependencies": {
-  "browser-runtime-package": ">=1.1.0",
+  "rdk.browser.wpe": ">=1.1.0",
 }
 ```
 
@@ -359,60 +362,38 @@ _Examples_
 
 This feature is helpful for local offline development and creating tests that require installing where you don't want to hit an external server.
 
-## capabilities
+## permissions
 
-These array represents capabilities that an `application` or `service` package is requesting. Runtime
-packages do not request capabilities, but the apps or services that run within the runtime may request them.
+These array represents permissions that an `application` or `service` package is requesting. Runtime
+packages do not request permissions, but the apps or services that run within the runtime may request them.
 
-| Capability \*)                                                                      |
-| ----------------------------------------------------------------------------------- |
-| [org.rdk.capability.internet](#org.rdk.capability.internet)                         |
-| [org.rdk.capability.asAccess](#org.rdk.capability.asAccess)                         |
-| [org.rdk.capability.asPlayer](#org.rdk.capability.asPlayer)                         |
-| [org.rdk.capability.firebolt](#org.rdk.capability.firebolt)                         |
-| [org.rdk.capability.thunder](#org.rdk.capability.thunder)                           |
-| [org.rdk.capability.mediarite](#org.rdk.capability.mediarite)                       |
-| [org.rdk.capability.rialto](#org.rdk.capability.rialto)                             |
-| [org.rdk.capability.airPlay](#org.rdk.capability.airPlay)                           |
-| [org.rdk.capability.gameController](#org.rdk.capability.gameController)             |
-| [org.rdk.capability.timeShiftBuffer](#org.rdk.capability.timeShiftBuffer)           |
-| [org.rdk.capability.readExternalStorage](#org.rdk.capability.readExternalStorage)   |
-| [org.rdk.capability.writeExternalStorage](#org.rdk.capability.writEexternalStorage) |
-| [org.rdk.capability.displayOverlay](#org.rdk.capability.displayOverlay)             |
-| [org.rdk.capability.homeApp](#org.rdk.capability.homeApp)                           |
-| [org.rdk.capability.compositor](#org.rdk.capability.compositor)                     |
+| Permission \*)                                                                              |
+| ------------------------------------------------------------------------------------------- |
+| [urn:rdk:permission:internet](#urn:rdk:permission:internet)                                 |
+| [urn:rdk:permission:firebolt](#urn:rdk:permission:firebolt)                                 |
+| [urn:rdk:permission:thunder](#urn:rdk:permission:thunder)                                   |
+| [urn:rdk:permission:mediarite](#urn:rdk:permission:mediarite)                               |
+| [urn:rdk:permission:rialto](#urn:rdk:permission:rialto)                                     |
+| [urn:rdk:permission:airplay](#urn:rdk:permission:airplay)                                   |
+| [urn:rdk:permission:compositor](#urn:rdk:permission:compositor)                             |
+| [urn:rdk:permission:game-controller](#urn:rdk:permission:game-controller)                   |
+| [urn:entos:permission:timeshift-buffer](#urn:entos:permission:timeshift-buffer)             |
+| [urn:entos:permission:read-external-storage](#urn:entos:permission:read-external-storage)   |
+| [urn:entos:permission:write-external-storage](#urn:entos:permission:write-external-storage) |
+| [urn:entos:permission:display-overlay](#urn:entos:permission:display-overlay)               |
+| [urn:entos:permission:home-app](#urn:entos:permission:home-app)                             |
+| [urn:entos:permission:as-access](#urn:entos:permission:as-access)                           |
+| [urn:entos:permission:as-player](#urn:entos:permission:as-player)                           |
 
 \*) List is extensible
 
-- ### org.rdk.capability.internet
+- ### urn:rdk:permission:internet
 
 _Internet Privilege_
 
 The app or service simply requires internet access, or more specifically access to the external network.
 
-- ### org.rdk.capability.asAccess
-
-_AS Access Privilege_
-
-There are 5 levels of AS access that an app or service can request. Different levels allow varying access to the
-AS system.
-
-See [AS Set Menus](https://www.stb.bskyb.com/confluence/display/2016/AS+Set+Menus) (Sky internal) for more information.
-
-- ### org.rdk.capability.asPlayer
-
-_AS Player Privilege_
-
-This privilege grants the app access to the wayland APIs to control the AS player surface properties.
-
-> [!NOTE]
-> This privilege is only available on platforms that support the ASPlayer. And is considered a legacy requirement,
-> going forward expect all video surfaces to be handled in a more generic way.
-
-> [!NOTE]
-> This doesn't control access to the ASPlayer REST API, this is controlled by the [AS Access Privilege](#as-access-privilege).
-
-- ### org.rdk.capability.firebolt
+- ### urn:rdk:permission:firebolt
 
 _Firebolt Privilege_
 
@@ -423,7 +404,7 @@ Individual firebolt permissions are not currently supported at this level of the
 additional _firebolt manifest_ file can be stored within the package and used to specify the firebolt permissions.
 However, this is subject to change.
 
-- ### org.rdk.capability.thunder
+- ### urn:rdk:permission:thunder
 
 _Thunder Privilege_
 
@@ -431,51 +412,58 @@ The app or service requires access to Thunder services.
 
 As with firebolt, individual thunder permissions are not currently supported at this level of the package metadata.
 
-- ### org.rdk.capability.mediarite
+- ### urn:rdk:permission:mediarite
 
 _Mediarite Privilege_
 
 The app or service requires access to the Mediarite tuner sub-system.
 
-- ### org.rdk.capability.rialto
+- ### urn:rdk:permission:rialto
 
 _Rialto Privilege_
 
 The app or service requires access to the Rialto media player interface. Meaning at start up the app or service will
 have a Rialto session created for it and can interact with the Rialto system.
 
-- ### org.rdk.capability.airPlay
+- ### urn:rdk:permission:airplay
 
 _AirPlay Privilege_
 
 The app or service requires access to the AirPlay sub-system.
 
-- ### org.rdk.capability.gameController
+- ### urn:rdk:permission:compositor
+
+_Compositor Privilege_
+
+The app or service is requesting access to the window manager / compositor interface. This allows the app or service
+to control the composition of apps on the screen.
+
+- ### urn:rdk:permission:game-controller
 
 _GameController Privilege_
 
 The app is requesting access to any connected game controllers.
 
-- ### org.rdk.capability.timeShiftBuffer
+- ### urn:entos:permission:timeshift-buffer
 
 _Time Shift Buffer Privilege_
 
 The app or service requires access to the time shift buffer.
 
-- ### org.rdk.capability.readExternalStorage
+- ### urn:entos:permission:read-external-storage
 
 _Read External Storage Privilege_
 
 The app or service is requesting access to read from external storage devices. This is typically a USB device, but in
 the future could include things like local network storage.
 
-- ### org.rdk.capability.writeExternalStorage
+- ### urn:entos:permission:write-external-storage
 
 _Write External Storage Privilege_
 
 The app or service is requesting access to write to external storage devices.
 
-- ### org.rdk.capability.displayOverlay
+- ### urn:entos:permission:display-overlay
 
 _Display Overlay Privilege_
 
@@ -485,7 +473,7 @@ top of all other apps, and if the overlay is a notification type, also capture i
 This privilege is used by the Sky EPG to display things like the voice search notification, or volume controls,
 picture settings, etc.
 
-- ### org.rdk.capability.homeApp
+- ### urn:entos:permission:home-app
 
 _Home App Privilege_
 
@@ -496,32 +484,47 @@ when the user exits an app.
 See [Home App Capability](https://wiki.at.sky/display/AAI/Home+App+Capability+-+What+it+Means+in+AppService) (Sky
 internal) for more information.
 
-- ### org.rdk.capability.compositor
+- ### urn:entos:permission:as-access
 
-_Compositor Privilege_
+_AS Access Privilege_
 
-The app or service is requesting access to the window manager / compositor interface. This allows the app or service
-to control the composition of apps on the screen.
+There are 5 levels of AS access that an app or service can request. Different levels allow varying access to the
+AS system.
+
+See [AS Set Menus](https://www.stb.bskyb.com/confluence/display/2016/AS+Set+Menus) (Sky internal) for more information.
+
+- ### urn:entos:permission:as-player
+
+_AS Player Privilege_
+
+This privilege grants the app access to the wayland APIs to control the AS player surface properties.
+
+> [!NOTE]
+> This privilege is only available on platforms that support the ASPlayer. And is considered a legacy requirement,
+> going forward expect all video surfaces to be handled in a more generic way.
+
+    > [!NOTE]
+    > This doesn't control access to the ASPlayer REST API, this is controlled by the [AS Access Privilege](#as-access-privilege).
 
 _Examples_
 
 ```json
-"capabilities": [
-  "org.rdk.capability.internet",
-  "org.rdk.capability.asAccess",
-  "org.rdk.capability.asPlayer",
-  "org.rdk.capability.firebolt",
-  "org.rdk.capability.thunder",
-  "org.rdk.capability.mediarite",
-  "org.rdk.capability.rialto",
-  "org.rdk.capability.airPlay",
-  "org.rdk.capability.gameController",
-  "org.rdk.capability.timeShiftBuffer",
-  "org.rdk.capability.readExternalStorage",
-  "org.rdk.capability.writEexternalStorage",
-  "org.rdk.capability.displayOverlay",
-  "org.rdk.capability.homeApp",
-  "org.rdk.capability.compositor"
+"permissions": [
+  "urn:rdk:permission.internet",
+  "urn:rdk:permission:firebolt",
+  "urn:rdk:permission:thunder",
+  "urn:rdk:permission:mediarite",
+  "urn:rdk:permission:rialto",
+  "urn:rdk:permission:airplay",
+  "urn:rdk:permission:compositor",
+  "urn:rdk:permission:game-controller",
+  "urn:entos:permission:timeshift-buffer",
+  "urn:entos:permission:read-external-storage",
+  "urn:entos:permission:write-external-storage",
+  "urn:entos:permission:display-overlay",
+  "urn:entos:permission:home-app",
+  "urn:entos:permission:as-access",
+  "urn:entos:permission:as-player"
 ]
 ```
 
@@ -529,25 +532,18 @@ _Examples_
 
 Settings object consist package specific settings.
 
-| Settings \*)                                                          | Runtime  | Application | Service  |
-| --------------------------------------------------------------------- | -------- | ----------- | -------- |
-| [org.rdk.settings.logLevels](#org.rdk.settings.logLevels)             | Disabled | Optional    | Optional |
-| [org.rdk.settings.parentPackageId](#org.rdk.settings.parentPackageId) | Disabled | Optional    | Disabled |
-| [org.rdk.settings.skyLiveApp](#org.rdk.settings.skyLiveApp)           | Disabled | Optional    | Disabled |
-| [org.rdk.settings.dial](#org.rdk.settings.dial)                       | Disabled | Optional    | Disabled |
-| [org.rdk.settings.inputHandling](#org.rdk.settings.inputHandling)     | Disabled | Optional    | Disabled |
-| [org.rdk.settings.displayInfo](#org.rdk.settings.displayInfo)         | Disabled | Optional    | Disabled |
-| [org.rdk.settings.audioInfo](#org.rdk.settings.audioInfo)             | Disabled | Optional    | Disabled |
-| [org.rdk.settings.memory](#org.rdk.settings.memory)                   | Disabled | Optional    | Optional |
-| [org.rdk.settings.storage](#org.rdk.settings.storage)                 | Disabled | Optional    | Optional |
-| [org.rdk.settings.lifecycleStates](#org.rdk.settings.lifecycleStates) | Disabled | Optional    | Optional |
-| [org.rdk.settings.network](#org.rdk.settings.network)                 | Disabled | Optional    | Optional |
-| [org.rdk.settings.timeouts](#org.rdk.settings.timeouts)               | Disabled | Optional    | Optional |
-| [org.rdk.settings.drmSupport](#org.rdk.settings.drmSupport)           | Disabled | Optional    | Optional |
+| Settings \*)                                                                  | Runtime  | Application | Service  |
+| ----------------------------------------------------------------------------- | -------- | ----------- | -------- |
+| [urn:rdk:settings:log-levels](#urn:rdk:settings:log-levels)                   | Disabled | Optional    | Optional |
+| [urn:entos:settings:parent-package-id](#urn:entos:settings:parent-package-id) | Disabled | Optional    | Disabled |
+| [urn:entos:settings:sky-live-app](#urn:rdk:settings:sky-live-app)             | Disabled | Optional    | Disabled |
+| [urn:rdk:settings:dial](#urn:rdk:settings:dial)                               | Disabled | Optional    | Disabled |
+| [urn:rdk:settings:lifecycle-states](#urn:rdk:settings:lifecycle-states)       | Disabled | Optional    | Optional |
+| [urn:rdk:settings:timeouts](#urn:rdk:settings:timeouts)                       | Disabled | Optional    | Optional |
 
 \*) List is extensible
 
-### org.rdk.settings.logLevels
+### urn:rdk:settings:log-levels
 
 The logging levels that the system will capture in the system log for the app or service. This is optional and
 restricted, it allows for certain apps to be more verbose in their production logging than others.
@@ -568,7 +564,7 @@ The levels are:
 _Object Schema_
 
 ```json
-"org.rdk.setting.logLevels": {
+"urn:rdk:setting:log-levels": {
   "description": "Logging levels.",
   "type": "array",
   "items": {
@@ -582,11 +578,11 @@ _Examples_
 
 ```json
 "settings": {
-  "org.rdk.settings.logLevels": [ "error", "warning", "milestone" ]
+  "urn:rdk:settings:log-levels": [ "error", "warning", "milestone" ]
 }
 ```
 
-### org.rdk.settings.parentPackageId
+### urn:entos:settings:parent-package-id
 
 If the application is a child of another application, then this will return the parent package `id`.
 
@@ -596,13 +592,13 @@ See [Parent and Child Apps capability](https://www.stb.bskyb.com/confluence/disp
 _Object Schema_
 
 ```json
-"org.rdk.settings.parentPackageId": {
+"urn:entos:settings:parent-package-id": {
   "description": "Parent package ID.",
   "type": "string"
 }
 ```
 
-### org.rdk.settings.skyLiveApp
+### urn:entos:settings:sky-live-app
 
 Boolean flag to indicate if the app is a Sky Live app. This is used by the system to determine how to handle the app.
 If this flag is set then additional metadata is expected in the package to define the Sky Live usage, see
@@ -612,7 +608,7 @@ If this flag is set then additional metadata is expected in the package to defin
 _Object Schema_
 
 ```json
-"org.rdk.settings.skyLiveApp": {
+"urn:entos:settings:sky-live-app": {
   "description": "Sky Live app flag.",
   "type": "boolean"
 }
@@ -622,11 +618,11 @@ _Examples_
 
 ```json
 "settings": {
-  "org.rdk.settings.skyLiveApp": true
+  "urn:entos:settings:sky-live-app": true
 }
 ```
 
-### org.rdk.settings.dial
+### urn:rdk:settings:dial
 
 If the app supports DIAL then this field contains the details for the DIAL service.
 
@@ -644,7 +640,7 @@ If the app supports DIAL then this field contains the details for the DIAL servi
 _Object Schema_
 
 ```json
-"org.rdk.settings.dial": {
+"urn:rdk:settings:dial": {
   "description": "DIAL service details.",
   "type": "object",
   "properties": {
@@ -672,7 +668,7 @@ _Examples_
 
 ```json
 "settings": {
-  "org.rdk.settings.dial": {
+  "urn:rdk:settings:dial": {
     "appNames": [ "uk.co.bbc.iPlayer", "uk.co.bbc.Sport", "uk.co.bbc.News" ],
     "corsDomains": [ "http://example.com", "https://bbc.co.uk" ],
     "originHeaderRequired": true
@@ -680,193 +676,7 @@ _Examples_
 }
 ```
 
-### org.rdk.settings.inputHandling
-
-The input handling configuration for the app. This is optional and allows the app to capture or be notified of certain
-input events.
-
-- #### System Key Capture Set
-  There is a set of _system_ keys that the system will always capture and pass to the _home_ app, regardless of the
-  currently focused app. This configuration allows the app to capture these keys instead of the _home_ app.
-- #### System Key Monitor Set
-  Similar to the _capture_ set, but in this case the monitored key will be sent to both the app AND the _home_ app.
-
-_Object Schema_
-
-```json
-"org.rdk.settings.inputHandling": {
-  "description": "Input handling configuration.",
-  "type": "object",
-  "properties": {
-    "keyCapture": { "type": "array", "items": { "type": "string" } },
-    "keyMonitor": { "type": "array", "items": { "type": "string" } }
-  }
-}
-```
-
-_Examples_
-
-```json
-"settings": {
-  "org.rdk.settings.inputHandling": {
-    "keyCapture": [ "search", "voice" ],
-    "keyMonitor": [ "volume+", "volume-" ]
-  }
-}
-```
-
-### org.rdk.settings.displayInfo
-
-The requested display details for the app. Apps can request different display sizes and refresh rates to best match
-their content. All fields are optional.
-
-- #### Display Size
-  The display size requested by the app, e.g. `1080`, `720`. Note that this typically only controls the virtual
-  display resolution for the app, the wayland output display size. The actual final composition and / or HDMI
-  display size is controlled by the system.
-- #### Display Refresh Rate
-  The display refresh rate requested by the app, e.g. `60`, `50`. Unlike the `displaySize` this does control the
-  actual output refresh rate and the system will attempt to match the requested rate when the app is running.
-  This may be overridden by the system if it is matching refresh rates against video content.
-- #### Picture Mode
-  The picture mode requested by the app, e.g. `HDR`, `SDR`. The actual mode is platform specific and may be
-  a predefined mode e.g. `game`, `dynamic`, `movie`, etc.
-
-_Object Schema_
-
-```json
-"org.rdk.settings.displayInfo": {
-  "description": "Display details.",
-  "type": "object",
-  "properties": {
-    "virtualSize": { "type": "integer" },
-    "refreshRate": { "type": "integer" },
-    "pictureMode": { "type": "string" }
-  }
-}
-```
-
-_Examples_
-
-```json
-"settings": {
-  "org.rdk.settings.displayInfo": {
-    "virtualSize": 720,
-    "refreshRate": 60,
-    "pictureMode": "game"
-  }
-}
-```
-
-### org.rdk.settings.audioInfo
-
-The requested audio details for the app. Apps can request different audio settings to best match their content.
-All fields are optional.
-
-- #### Sound Mode
-  The optional name of the sound mode to set, e.g. `kids`, `surround`, `dolby`.
-- #### Sound Scene
-  The optional name of the sound scene to set, e.g. `sports`, `cinema`, `music`.
-- #### Sound Level
-  Loudness adjustment value for the app. This is a value between -100 and 100, where 0 is the default level.
-  See [App-specific loudness adjustment](https://www.stb.bskyb.com/confluence/display/2016/App-specific+loudness+adjustment)
-  (Sky internal) for more information.
-
-_Object Schema_
-
-```json
-"org.rdk.settings.audioInfo": {
-  "description": "Audio details.",
-  "type": "object",
-  "properties": {
-    "soundMode": { "type": "string" },
-    "soundScene": { "type": "string" },
-    "soundLevel": {
-      "type": "integer",
-      "minimum": -100,
-      "maximum": 100
-    }
-  }
-}
-```
-
-_Examples_
-
-```json
-"settings": {
-  "org.rdk.settings.audioInfo": {
-    "soundMode": "kids",
-    "soundScene": "cinema",
-    "soundLevel": -10
-  }
-}
-```
-
-### org.rdk.settings.memory
-
-The requested memory quota for the app or service. This is optional and used as a hint to the system about the required
-memory usage. The system may use this to determine when to run the app or service, or to apply limits on the memory
-usage.
-
-- #### System Memory
-  The amount of system memory required by the app or service.
-- #### GPU Memory
-  The amount of GPU memory required by the app or service.
-
-_Object Schema_
-
-```json
-"org.rdk.settings.memory": {
-  "description": "Memory quota. Value can be specified with G, M, or B suffix. If no suffix is provided, the value is assumed to be in bytes.",
-  "type": "object",
-  "properties": {
-    "system": {
-      "type": "string",
-      "pattern": "^\\d+[GMB]?$"
-    },
-    "gpu": {
-      "type": "string",
-      "pattern": "^\\d+[GMB]?$"
-    }
-  }
-}
-```
-
-_Examples_
-
-```json
-"settings": {
-  "org.rdk.settings.memory": {
-    "system": "256M",
-    "gpu": "128M"
-  }
-}
-```
-
-### org.rdk.settings.storage
-
-The requested storage quota for the app or service (in MB). This is optional and used as a hint to the system about the
-amount of storage for the app or service.
-
-_Object Schema_
-
-```json
-"org.rdk.settings.storage": {
-  "description": "Storage quota. Value can be specified with G, M, or B suffix. If no suffix is provided, the value is assumed to be in bytes.",
-  "type": "string",
-  "pattern": "^\\d+[GMB]?$",
-}
-```
-
-_Examples_
-
-```json
-"settings": {
-  "org.rdk.settings.storage": "32M"
-}
-```
-
-### org.rdk.settings.lifecycleStates
+### urn:rdk:settings:lifecycle-states
 
 Set of the supported lifecycle states for the app or service. This is used as a hint to the system, for example if
 the app doesn't support deep sleep / hibernation then the system can shut down the app or service before entering deep
@@ -880,7 +690,7 @@ Another example is if the app doesn't support lifecycle, then it would likely on
 _Object Schema_
 
 ```json
-"org.rdk.settings.lifecycleStates": {
+"urn:rdk:settings:lifecycle-states": {
   "description": "Set of the supported lifecycle states for the app or service.",
   "type": "object",
   "properties": {
@@ -958,7 +768,7 @@ _Examples_
 ```json
 "settings": {
   {
-    "org.rdk.settings.lifecycleStates": {
+    "urn:rdk:settings:lifecycle-states": {
       "version": "v1.5",
       "states": ["inactive", "foreground", "background"]
     }
@@ -968,113 +778,14 @@ _Examples_
 
 ```json
 "settings": {
-  "org.rdk.settings.lifecycleStates": {
+  "urn:rdk:settings:lifecycle-states": {
     "version": "v2.0",
     "states": ["Initializing", "Active", "Suspended"]
   }
 }
 ```
 
-### org.rdk.settings.network
-
-And app or service can request access to or expose a network services. Network services are divided into three
-categories:
-
-- #### Public
-  Network services that an app or service exposes outside the device.
-- #### Exported
-  Service that an app or service exposes to other apps or services on the device.
-- #### Imported
-  Network services supplied by another app or service that the current app requires access to.
-
-`Exported` and `Imported` services are related, if an app exports a service then another app can import that service,
-but the `port` and `protocol` must match.
-
-In practical terms, these settings correspond to firewall rules that are applied to the app or service in the container.
-It's up to the app or service to actually listen on the ports and handle the network traffic.
-
-> [!NOTE]
-> Currently this configuration uses fixed ports defined by the app or service. In the future, we'll look at adding
-> options for dynamic port assignment.
-
-_Object Schema_
-
-```json
-"org.rdk.settings.network": {
-  "description": "Network services configuration.",
-  "type": "object",
-  "properties": {
-    "public": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "name": { "type": "string" },
-          "port": { "type": "integer" },
-          "protocol": { "type": "string" }
-        },
-        "required": ["name", "port", "protocol"]
-      }
-    },
-    "exported": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "name": { "type": "string" },
-          "port": { "type": "integer" },
-          "protocol": { "type": "string" }
-        },
-        "required": ["name", "port", "protocol"]
-      }
-    },
-    "imported": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "name": { "type": "string" },
-          "port": { "type": "integer" },
-          "protocol": { "type": "string" }
-        },
-        "required": ["name", "port", "protocol"]
-      }
-    }
-  }
-}
-```
-
-_Examples_
-
-```json
-"settings": {
-  "org.rdk.settings.network": {
-    "public": [
-      {
-        "name": "netflix-mdx",
-        "port": 8009,
-        "protocol": "tcp"
-      }
-    ],
-    "exported": [
-      {
-        "name": "com.example.myapp.service"
-        "port": 1234,
-        "protocol": "tcp"
-      }
-    ],
-    "imported": [
-      {
-        "name": "com.example.someotherapp.service"
-        "port": 4567,
-        "protocol": "tcp"
-      }
-    ]
-  }
-}
-```
-
-### org.rdk.settings.timeouts
+### urn:rdk:settings:timeouts
 
 Defines the timeouts for the app or service startup and watchdog.
 
@@ -1087,7 +798,7 @@ Defines the timeouts for the app or service startup and watchdog.
 _Object Schema_
 
 ```json
-"org.rdk.settings.timeouts": {
+"urn:rdk:settings:timeouts": {
   "description": "Startup and watchdog timeouts.",
   "type": "object",
   "properties": {
@@ -1102,41 +813,31 @@ _Examples_
 
 ```json
 "settings": {
-  "org.rdk.settings.timeouts": {
+  "urn:rdk:settings:timeouts": {
     "startupTimeoutSeconds": 60,
     "watchdogTimeoutSeconds": 30
   }
 }
 ```
 
-### org.rdk.settings.drmSupport
+## requirements
 
-A set of DRM systems that the app or service supports / requires. This is optional and used as a hint to the system about the DRM systems that the app or service requires.
+Requirements object consist package specific HW/Platform requirements.
 
-#### Note
+| Requirement \*)                                                           | Runtime  | Application | Service  |
+| ------------------------------------------------------------------------- | -------- | ----------- | -------- |
+| [urn:rdk:requirement:platform](#urn:rdk:requirement:platform)             | Disabled | Optional    | Optional |
+| [urn:rdk:requirement:input-handling](#urn:rdk:requirement:input-handling) | Disabled | Optional    | Optional |
+| [urn:rdk:requirement:display-info](#urn:rdk:requirement:display-info)     | Disabled | Optional    | Optional |
+| [urn:rdk:requirement:audio-info](#urn:rdk:requirement:audio-info)         | Disabled | Optional    | Optional |
+| [urn:rdk:requirement:network](#urn:rdk:requirement:network)               | Disabled | Optional    | Optional |
+| [urn:rdk:requirement:memory](#urn:rdk:requirement:memory)                 | Disabled | Optional    | Optional |
+| [urn:rdk:requirement:storage](#urn:rdk:requirement:storage)               | Disabled | Optional    | Optional |
+| [urn:rdk:requirement:drm-support](#urn:rdk:requirement:drm-support)       | Disabled | Optional    | Optional |
 
-Currently each DRM type is listed as a free from string, but in the future this may be changed to a more structured definition of DRM system, and likely will follow EME [Key System][https://w3c.github.io/encrypted-media/#dfn-key-system] specification.
+\*) List is extensible
 
-_Object Schema_
-
-```json
-"org.rdk.settings.drmSupport": {
-  "description": "Supported DRM systems.",
-  "type": "array",
-  "items": { "type": "string" }
-}
-
-```
-
-_Examples_
-
-```json
-"settings": {
-  "org.rdk.settings.drmSupport": [ "org.w3.clearkey", "com.microsoft.playready" ]
-}
-```
-
-## platform
+### urn:rdk:requirement:platform
 
 This OPTIONAL object specifies the platform on which the package is intended to run.
 This object is complaint with corresponding object in [OCI Index](https://github.com/opencontainers/image-spec/blob/main/image-index.md#image-index-property-descriptions) and [OCI Image Config](https://github.com/opencontainers/image-spec/blob/main/config.md#properties).
@@ -1205,7 +906,7 @@ In RDK environment the values that will be used:
 _Object Schema_
 
 ```json
-"platform": {
+"urn:rdk:requirement:platform": {
   "description": "Specifies the platform on which the package is intended to run.",
   "type": "object",
   "properties": {
@@ -1229,9 +930,324 @@ _Object Schema_
 _Examples_
 
 ```json
-"platform": {
-  "architecture": "arm",
-  "variant": "v7",
-  "os": "linux"
+"requirements": {
+  "urn:rdk:requirement:platform": {
+    "architecture": "arm",
+    "variant": "v7",
+    "os": "linux"
+  }
+}
+
+```
+
+### urn:rdk:requirement:input-handling
+
+The input handling configuration for the app. This is optional and allows the app to capture or be notified of certain
+input events.
+
+- #### System Key Capture Set
+  There is a set of _system_ keys that the system will always capture and pass to the _home_ app, regardless of the
+  currently focused app. This configuration allows the app to capture these keys instead of the _home_ app.
+- #### System Key Monitor Set
+  Similar to the _capture_ set, but in this case the monitored key will be sent to both the app AND the _home_ app.
+
+_Object Schema_
+
+```json
+"urn:rdk:requirement:input-handling": {
+  "description": "Input handling configuration.",
+  "type": "object",
+  "properties": {
+      "keyCapture": { "type": "array", "items": { "type": "string" } },
+      "keyMonitor": { "type": "array", "items": { "type": "string" } }
+  }
+}
+```
+
+_Examples_
+
+```json
+"requirements": {
+  "urn:rdk:requirement:input-handling": {
+    "keyCapture": [ "search", "voice" ],
+    "keyMonitor": [ "volume+", "volume-" ]
+  }
+}
+```
+
+### urn:rdk:requirement:display-info
+
+The requested display details for the app. Apps can request different display sizes and refresh rates to best match
+their content. All fields are optional.
+
+- #### Display Size
+  The display size requested by the app, e.g. `1080`, `720`. Note that this typically only controls the virtual
+  display resolution for the app, the wayland output display size. The actual final composition and / or HDMI
+  display size is controlled by the system.
+- #### Display Refresh Rate
+  The display refresh rate requested by the app, e.g. `60`, `50`. Unlike the `displaySize` this does control the
+  actual output refresh rate and the system will attempt to match the requested rate when the app is running.
+  This may be overridden by the system if it is matching refresh rates against video content.
+- #### Picture Mode
+  The picture mode requested by the app, e.g. `HDR`, `SDR`. The actual mode is platform specific and may be
+  a predefined mode e.g. `game`, `dynamic`, `movie`, etc.
+
+_Object Schema_
+
+```json
+"urn:rdk:requirement:display-info": {
+  "description": "Display details.",
+  "type": "object",
+  "properties": {
+    "virtualSize": { "type": "integer" },
+    "refreshRate": { "type": "integer" },
+    "pictureMode": { "type": "string" }
+  }
+}
+```
+
+_Examples_
+
+```json
+"requirements": {
+  "urn:rdk:requirement:display-info": {
+    "virtualSize": 720,
+    "refreshRate": 60,
+    "pictureMode": "game"
+  }
+}
+```
+
+### urn:rdk:requirement:audio-info
+
+The requested audio details for the app. Apps can request different audio settings to best match their content.
+All fields are optional.
+
+- #### Sound Mode
+  The optional name of the sound mode to set, e.g. `kids`, `surround`, `dolby`.
+- #### Sound Scene
+  The optional name of the sound scene to set, e.g. `sports`, `cinema`, `music`.
+- #### Sound Level
+  Loudness adjustment value for the app. This is a value between -100 and 100, where 0 is the default level.
+  See [App-specific loudness adjustment](https://www.stb.bskyb.com/confluence/display/2016/App-specific+loudness+adjustment)
+  (Sky internal) for more information.
+
+_Object Schema_
+
+```json
+"urn:rdk:requirement:audio-info": {
+  "description": "Audio details.",
+  "type": "object",
+  "properties": {
+    "soundMode": { "type": "string" },
+    "soundScene": { "type": "string" },
+    "soundLevel": {
+      "type": "integer",
+      "minimum": -100,
+      "maximum": 100
+    }
+  }
+}
+```
+
+_Examples_
+
+```json
+"requierements": {
+  "urn:rdk:requirement:audio-info": {
+    "soundMode": "kids",
+    "soundScene": "cinema",
+    "soundLevel": -10
+  }
+}
+```
+
+### urn:rdk:requirement:network
+
+And app or service can request access to or expose a network services. Network services are divided into three
+categories:
+
+- #### Public
+  Network services that an app or service exposes outside the device.
+- #### Exported
+  Service that an app or service exposes to other apps or services on the device.
+- #### Imported
+  Network services supplied by another app or service that the current app requires access to.
+
+`Exported` and `Imported` services are related, if an app exports a service then another app can import that service,
+but the `port` and `protocol` must match.
+
+In practical terms, these settings correspond to firewall rules that are applied to the app or service in the container.
+It's up to the app or service to actually listen on the ports and handle the network traffic.
+
+> [!NOTE]
+> Currently this configuration uses fixed ports defined by the app or service. In the future, we'll look at adding
+> options for dynamic port assignment.
+
+_Object Schema_
+
+```json
+"urn:rdk:requirement:network": {
+  "description": "Network services configuration.",
+  "type": "object",
+  "properties": {
+    "public": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "port": { "type": "integer" },
+          "protocol": { "type": "string" }
+        },
+        "required": ["name", "port", "protocol"]
+      }
+    },
+    "exported": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "port": { "type": "integer" },
+          "protocol": { "type": "string" }
+        },
+        "required": ["name", "port", "protocol"]
+      }
+    },
+    "imported": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "port": { "type": "integer" },
+          "protocol": { "type": "string" }
+        },
+        "required": ["name", "port", "protocol"]
+      }
+    }
+  }
+}
+```
+
+_Examples_
+
+```json
+"requirements": {
+  "urn:rdk:requirement:network": {
+    "public": [
+      {
+        "name": "netflix-mdx",
+        "port": 8009,
+        "protocol": "tcp"
+      }
+    ],
+    "exported": [
+      {
+        "name": "com.example.myapp.service"
+        "port": 1234,
+        "protocol": "tcp"
+      }
+    ],
+    "imported": [
+      {
+        "name": "com.example.someotherapp.service"
+        "port": 4567,
+        "protocol": "tcp"
+      }
+    ]
+  }
+}
+```
+
+### urn:rdk:requirement:memory
+
+The requested memory quota for the app or service. This is optional and used as a hint to the system about the required
+memory usage. The system may use this to determine when to run the app or service, or to apply limits on the memory
+usage.
+
+- #### System Memory
+  The amount of system memory required by the app or service.
+- #### GPU Memory
+  The amount of GPU memory required by the app or service.
+
+_Object Schema_
+
+```json
+"urn:rdk:requirement:memory": {
+  "description": "Memory quota. Value can be specified with G, M, or B suffix. If no suffix is provided, the value is assumed to be in bytes.",
+  "type": "object",
+  "properties": {
+    "system": {
+      "type": "string",
+      "pattern": "^\\d+[GMB]?$"
+    },
+    "gpu": {
+      "type": "string",
+      "pattern": "^\\d+[GMB]?$"
+    }
+  }
+}
+```
+
+_Examples_
+
+```json
+"requirements": {
+  "urn:rdk:requirement:memory": {
+    "system": "256M",
+    "gpu": "128M"
+  }
+}
+```
+
+### urn:rdk:requirement:storage
+
+The requested storage quota for the app or service (in MB). This is optional and used as a hint to the system about the
+amount of storage for the app or service.
+
+_Object Schema_
+
+```json
+"urn:rdk:requirement:storage": {
+  "description": "Storage quota. Value can be specified with G, M, or B suffix. If no suffix is provided, the value is assumed to be in bytes.",
+    "type": "string",
+    "pattern": "^\\d+[GMB]?$",
+}
+```
+
+_Examples_
+
+```json
+"requirements": {
+  "urn:rdk:requirement:storage": "32M"
+}
+```
+
+### urn:rdk:requirement:drm-support
+
+A set of DRM systems that the app or service supports / requires. This is optional and used as a hint to the system about the DRM systems that the app or service requires.
+
+#### Note
+
+Currently each DRM type is listed as a free from string, but in the future this may be changed to a more structured definition of DRM system, and likely will follow EME [Key System][https://w3c.github.io/encrypted-media/#dfn-key-system] specification.
+
+_Object Schema_
+
+```json
+"urn:rdk:requirement:drm-support": {
+  "description": "Supported DRM systems.",
+  "type": "array",
+  "items": { "type": "string" }
+}
+
+```
+
+_Examples_
+
+```json
+"requirements": {
+  "urn:rdk:requirement:drm-support": [ "org.w3.clearkey", "com.microsoft.playready" ]
 }
 ```

@@ -75,12 +75,12 @@
         "type": "string"
       }
     },
-    "capabilities": {
-      "description": "Section representing requested capabilities.",
+    "permissions": {
+      "description": "Section representing requested permission.",
       "type": "array",
       "items": {
         "type": "string",
-        "description": "Capability string in revers domain notation"
+        "description": "Permission string in URN notation."
       }
     },
     "settings": {
@@ -88,24 +88,10 @@
       "type": "object",
       "additionalProperties": true
     },
-    "platform": {
-      "description": "Specifies the platform on which the package is intended to run.",
+    "requirements": {
+      "description": "Package HW/Platform requirements.",
       "type": "object",
-      "properties": {
-        "architecture": {
-          "description": "The CPU architecture of the platform. Examples: 'amd64', 'arm', 'ppc64le'.",
-          "type": "string"
-        },
-        "variant": {
-          "description": "The CPU architecture variant. This field is OPTIONAL. Examples: 'v7' for ARM, 'z' for s390x.",
-          "type": "string"
-        },
-        "os": {
-          "description": "The operating system of the platform. Examples: 'linux', 'windows', 'darwin'.",
-          "type": "string"
-        }
-      },
-      "required": ["architecture", "os"]
+      "additionalProperties": true
     }
   },
   "required": ["id", "version", "type", "entryPoint"]

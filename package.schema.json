@@ -21,52 +21,23 @@
       "type": "string",
       "minLength": 1
     },
-    "title": {
-      "description": "User readable string that represents the title of the package.",
+    "name": {
+      "description": "User readable string that represents the name of the package.",
       "type": "string",
       "minLength": 1
     },
-    "description": {
-      "description": "Brief information about the package.",
+    "packageType": {
+      "description": "Package type information.",
       "type": "string"
     },
-    "icons": {
-      "description": "Array of icon files within the package.",
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "src": {
-            "type": "string",
-            "description": "The path to the image file, relative to the package root."
-          },
-          "sizes": {
-            "type": "string",
-            "description": "A space-separated list of dimensions (e.g., '48x48 72x72').",
-            "pattern": "^([0-9]+x[0-9]+)(\\s[0-9]+x[0-9]+)*$"
-          },
-          "type": {
-            "type": "string",
-            "description": "The MIME type of the image (e.g., 'image/png').",
-            "pattern": "^image\\/.*$"
-          },
-          "purpose": {
-            "type": "string",
-            "description": "The purpose of the image (e.g., 'any', 'maskable', 'monochrome').",
-            "enum": ["any", "maskable", "monochrome"]
-          }
-        },
-        "required": ["src"],
-        "additionalProperties": false
-      }
-    },
-    "type": {
-      "description": "Application/Runtime type information.",
+    "runtimeType": {
+      "description": "Runtime type information.",
       "type": "string"
     },
     "entryPoint": {
       "description": "Path to the entry point within the package.",
-      "type": "string"
+      "type": "string",
+      "minLength": 1
     },
     "dependencies": {
       "description": "Dependencies are specified with a package name to version range. The version range is a string which has one or more space-separated descriptors. Dependencies can also be identified with a tarball, digest, tag or git URL.",
@@ -81,18 +52,16 @@
       "items": {
         "type": "string",
         "description": "Permission string in URN notation."
-      }
+      },
+      "minItems": 1,
+      "uniqueItems": true
     },
-    "settings": {
-      "description": "Package specific settings.",
-      "type": "object",
-      "additionalProperties": true
-    },
-    "requirements": {
-      "description": "Package HW/Platform requirements.",
+    "configuration": {
+      "description": "Package specific configuration.",
       "type": "object",
       "additionalProperties": true
     }
   },
-  "required": ["id", "version", "type", "entryPoint"]
+  "required": ["id", "version", "packageType", "entryPoint"],
+  "additionalProperties": false
 }

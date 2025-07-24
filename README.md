@@ -135,15 +135,21 @@ The `id` MUST comply with the following rules:
 _Examples_
 
 ```json
-"id": "com.example.myapp"
+{
+  "id": "com.example.myapp"
+}
 ```
 
 ```json
-"id": "Netflix"
+{
+  "id": "Netflix"
+}
 ```
 
 ```json
-"id": "rdk.browser.wpe"
+{
+  "id": "rdk.browser.wpe"
+}
 ```
 
 ## version
@@ -154,11 +160,15 @@ include a leading zero. For example, `2.01` is not allowed; however, `0.2`, `2.0
 _Examples_
 
 ```json
-"version": "1.0.0"
+{
+  "version": "1.0.0"
+}
 ```
 
 ```json
-"version": "0.1.20"
+{
+  "version": "0.1.20"
+}
 ```
 
 ## versionName
@@ -172,7 +182,9 @@ If `versionName` is not present, then the `version` field is used as the version
 _Examples_
 
 ```json
-"versionName": "1.0.1-beta"
+{
+  "versionName": "1.0.1-beta"
+}
 ```
 
 ## name
@@ -185,7 +197,9 @@ There are no restrictions on the name except that if present it must not be an e
 _Examples_
 
 ```json
-"name": "My App"
+{
+  "name": "My App"
+}
 ```
 
 ## packageType
@@ -205,7 +219,9 @@ _Examples_
 Package consist application:
 
 ```json
-"packageType": "application"
+{
+  "packageType": "application"
+}
 ```
 
 ## runtimeType
@@ -243,7 +259,7 @@ Package consist application that relies on HTML Runtime:
 
 ```json
 {
-  "packageType": "application"
+  "packageType": "application",
   "runtimeType": "html"
 }
 ```
@@ -260,15 +276,21 @@ The entry point path is relative to the root of the package.
 _Examples_
 
 ```json
-"entryPoint": "SkyBrowserLauncher"
+{
+  "entryPoint": "SkyBrowserLauncher"
+}
 ```
 
 ```json
-"entryPoint": "bin/NetflixApp"
+{
+  "entryPoint": "bin/NetflixApp"
+}
 ```
 
 ```json
-"entryPoint": "web/index.html"
+{
+  "entryPoint": "web/index.html"
+}
 ```
 
 ## dependencies
@@ -297,8 +319,10 @@ See [semver](https://semver.org/) for more details about specifying version rang
 _Examples_
 
 ```json
-"dependencies": {
-  "rdk.browser.wpe": ">=1.1.0",
+{
+  "dependencies": {
+    "rdk.browser.wpe": ">=1.1.0"
+  }
 }
 ```
 
@@ -315,9 +339,11 @@ You can provide a path to a local directory that contains a package.
 _Examples_
 
 ```json
-"dependencies": {
-  "foo-bar-relative": "../foo/bar",
-  "foo-bar-absolute": "/foo/bar"
+{
+  "dependencies": {
+    "foo-bar-relative": "../foo/bar",
+    "foo-bar-absolute": "/foo/bar"
+  }
 }
 ```
 
@@ -330,7 +356,7 @@ packages do not request permissions, but the apps or services that run within th
 
 | Permission \*)                                                                                        |
 | ----------------------------------------------------------------------------------------------------- |
-| _RDK:_                                                                                                |
+| _RDK_                                                                                                 |
 | [urn:rdk:permission:home-app](#urn:rdk:permission:home-app)                                           |
 | [urn:rdk:permission:internet](#urn:rdk:permission:internet)                                           |
 | [urn:rdk:permission:firebolt](#urn:rdk:permission:firebolt)                                           |
@@ -342,7 +368,7 @@ packages do not request permissions, but the apps or services that run within th
 | [urn:rdk:permission:external-storage::write](#urn:rdk:permission:external-storage::write)             |
 | [urn:rdk:permission:display-overlay](#urn:rdk:permission:display-overlay)                             |
 | [urn:rdk:permission:compositor](#urn:rdk:permission:compositor)                                       |
-| _ENTOS:_                                                                                              |
+| _ENTOS_                                                                                               |
 | [urn:entos:permission:as-access:(n)](<#urn:entos:permission:as-access:(n)>)                           |
 | [urn:entos:permission:as-player](#urn:entos:permission:as-player)                                     |
 | [urn:entos:permission:mediarite:api](#urn:entos:permission:mediarite:api)                             |
@@ -509,7 +535,8 @@ This does not grant the app permission to modify entitlements, only to read the 
 _Examples_
 
 ```json
-"permissions": [
+{
+  "permissions": [
     "urn:rdk:permission:home-app",
     "urn:rdk:permission.internet",
     "urn:rdk:permission:firebolt",
@@ -529,7 +556,8 @@ _Examples_
     "urn:entos:permission:bearer-token-authentication",
     "urn:entos:permission:sky-live",
     "urn:entos:permission:entitlements-info"
-]
+  ]
+}
 ```
 
 ## configuration
@@ -568,26 +596,31 @@ This allows to override defualt configuration of any of your dependencies eg. de
 _Object Schema_
 
 ```json
-"urn:rdk:config:overrides": {
-  "description": "Window details.",
-  "type": "object",
-  "properties": {
-    "application": {
-      "description": "An undefined JSON Blog that allows to override config values used by the application.",
-      "type": "object",
-      "additionalProperties": true
-  },
-  "properties": {
-    "runtime": {
-      "description": "An undefined JSON Blog that allows to override config values used by the runtime.",
-      "type": "object",
-      "additionalProperties": true
-  },
-  "properties": {
-    "base": {
-      "description": "An undefined JSON Blog that allows to override config values used by the base layer.",
-      "type": "object",
-      "additionalProperties": true
+{
+  "urn:rdk:config:overrides": {
+    "description": "Window details.",
+    "type": "object",
+    "properties": {
+      "application": {
+        "description": "An undefined JSON Blog that allows to override config values used by the application.",
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "properties": {
+      "runtime": {
+        "description": "An undefined JSON Blog that allows to override config values used by the runtime.",
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "properties": {
+      "base": {
+        "description": "An undefined JSON Blog that allows to override config values used by the base layer.",
+        "type": "object",
+        "additionalProperties": true
+      }
+    }
   }
 }
 ```
@@ -595,15 +628,17 @@ _Object Schema_
 _Examples_
 
 ```json
-"configuration": {
-  "urn:rdk:config:overrides": {
-    "application": {
-      "colorTheme" : "vivid",
-    },
-    "runtime": {
-      "userAgent": "BBC_requirement_requesting_Operator_Specific_UserAgent",
-      "libInject": "oiptv.js",
-      "mTls": "/etc/certs/client_operator.cert"
+{
+  "configuration": {
+    "urn:rdk:config:overrides": {
+      "application": {
+        "colorTheme": "vivid"
+      },
+      "runtime": {
+        "userAgent": "BBC_requirement_requesting_Operator_Specific_UserAgent",
+        "libInject": "oiptv.js",
+        "mTls": "/etc/certs/client_operator.cert"
+      }
     }
   }
 }
@@ -630,12 +665,14 @@ The levels are:
 _Object Schema_
 
 ```json
-"urn:rdk:config:log-levels": {
-  "description": "Logging levels.",
-  "type": "array",
-  "items": {
-    "type": "string",
-    "enum": ["fatal", "error", "warning", "milestone", "info", "debug"]
+{
+  "urn:rdk:config:log-levels": {
+    "description": "Logging levels.",
+    "type": "array",
+    "items": {
+      "type": "string",
+      "enum": ["fatal", "error", "warning", "milestone", "info", "debug"]
+    }
   }
 }
 ```
@@ -643,8 +680,10 @@ _Object Schema_
 _Examples_
 
 ```json
-"configuration: {
-  "urn:rdk:config:log-levels": [ "error", "warning", "milestone" ]
+{
+  "configuration": {
+    "urn:rdk:config:log-levels": ["error", "warning", "milestone"]
+  }
 }
 ```
 
@@ -666,24 +705,26 @@ If the app supports DIAL then this field contains the details for the DIAL servi
 _Object Schema_
 
 ```json
-"urn:rdk:config:dial": {
-  "description": "DIAL service details.",
-  "type": "object",
-  "properties": {
-    "appNames": {
-      "type": "array",
-      "items": {
-        "type": "string"
+{
+  "urn:rdk:config:dial": {
+    "description": "DIAL service details.",
+    "type": "object",
+    "properties": {
+      "appNames": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "corsDomains": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "originHeaderRequired": {
+        "type": "boolean"
       }
-    },
-    "corsDomains": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
-    },
-    "originHeaderRequired": {
-      "type": "boolean"
     }
   }
 }
@@ -692,11 +733,13 @@ _Object Schema_
 _Examples_
 
 ```json
-"configuration": {
-  "urn:rdk:config:dial": {
-    "appNames": [ "uk.co.bbc.iPlayer", "uk.co.bbc.Sport", "uk.co.bbc.News" ],
-    "corsDomains": [ "http://example.com", "https://bbc.co.uk" ],
-    "originHeaderRequired": true
+{
+  "configuration": {
+    "urn:rdk:config:dial": {
+      "appNames": ["uk.co.bbc.iPlayer", "uk.co.bbc.Sport", "uk.co.bbc.News"],
+      "corsDomains": ["http://example.com", "https://bbc.co.uk"],
+      "originHeaderRequired": true
+    }
   }
 }
 ```
@@ -725,40 +768,48 @@ Set of the lifecycle related configs for the app or service.
 _Object Schema_
 
 ```json
-"urn:rdk:config:application-lifecycle": {
-  "description": "Set of the supported lifecycle parameters for the app or service.",
-  "type": "object",
-  "properties": {
-    "supportedNonActiveStates": {
-      "type": "array",
-      "items": {
-        "type": "string"
+{
+  "urn:rdk:config:application-lifecycle": {
+    "description": "Set of the supported lifecycle parameters for the app or service.",
+    "type": "object",
+    "properties": {
+      "supportedNonActiveStates": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Array of supported  non-active lifecycle states."
       },
-      "description": "Array of supported  non-active lifecycle states."
+      "maxSuspendedSystemMemory": {
+        "type": "string",
+        "pattern": "^\\d+[GMB]?$"
+      },
+      "maxTimeToSuspendMemoryState": { "type": "integer" },
+      "startupTimeout": { "type": "integer" },
+      "watchdogInteval": { "type": "integer" }
     },
-    "maxSuspendedSystemMemory": {
-      "type": "string",
-      "pattern": "^\\d+[GMB]?$"
-    },
-    "maxTimeToSuspendMemoryState": { "type": "integer" },
-    "startupTimeout": { "type": "integer" },
-    "watchdogInteval": { "type": "integer" }
-  },
-  "required": ["supportedNonActiveStates", "maxSuspendedSystemMemory", "maxTimeToSuspendMemoryState"],
-  "additionalProperties": false
- }
+    "required": [
+      "supportedNonActiveStates",
+      "maxSuspendedSystemMemory",
+      "maxTimeToSuspendMemoryState"
+    ],
+    "additionalProperties": false
+  }
+}
 ```
 
 _Examples_
 
 ```json
-"configuration": {
-  "urn:rdk:config:application-lifecycle": {
-    "supportedNonActiveStates": ["paused", "suspended", "hibernated"],
-    "maxSuspendedSystemMemory": "16M",
-    "maxTimeToSuspendMemoryState": "10",
-    "startupTimeout": 60,
-    "watchdogInterval": 30
+{
+  "configuration": {
+    "urn:rdk:config:application-lifecycle": {
+      "supportedNonActiveStates": ["paused", "suspended", "hibernated"],
+      "maxSuspendedSystemMemory": "16M",
+      "maxTimeToSuspendMemoryState": "10",
+      "startupTimeout": 60,
+      "watchdogInterval": 30
+    }
   }
 }
 ```
@@ -830,38 +881,41 @@ In RDK environment the values that will be used:
 _Object Schema_
 
 ```json
-"urn:rdk:config:platform": {
-  "description": "Specifies the platform on which the package is intended to run.",
-  "type": "object",
-  "properties": {
-    "architecture": {
-      "description": "The CPU architecture of the platform. Examples: 'amd64', 'arm', 'ppc64le'.",
-      "type": "string"
+{
+  "urn:rdk:config:platform": {
+    "description": "Specifies the platform on which the package is intended to run.",
+    "type": "object",
+    "properties": {
+      "architecture": {
+        "description": "The CPU architecture of the platform. Examples: 'amd64', 'arm', 'ppc64le'.",
+        "type": "string"
+      },
+      "variant": {
+        "description": "The CPU architecture variant. This field is OPTIONAL. Examples: 'v7' for ARM, 'z' for s390x.",
+        "type": "string"
+      },
+      "os": {
+        "description": "The operating system of the platform. Examples: 'linux', 'windows', 'darwin'.",
+        "type": "string"
+      }
     },
-    "variant": {
-      "description": "The CPU architecture variant. This field is OPTIONAL. Examples: 'v7' for ARM, 'z' for s390x.",
-      "type": "string"
-    },
-    "os": {
-      "description": "The operating system of the platform. Examples: 'linux', 'windows', 'darwin'.",
-      "type": "string"
-    }
-  },
-  "required": ["architecture", "os"]
+    "required": ["architecture", "os"]
+  }
 }
 ```
 
 _Examples_
 
 ```json
-"configuration": {
-  "urn:rdk:config:platform": {
-    "architecture": "arm",
-    "variant": "v7",
-    "os": "linux"
+{
+  "configuration": {
+    "urn:rdk:config:platform": {
+      "architecture": "arm",
+      "variant": "v7",
+      "os": "linux"
+    }
   }
 }
-
 ```
 
 ### urn:rdk:config:keys
@@ -885,13 +939,15 @@ input events.
 _Object Schema_
 
 ```json
-"urn:rdk:config:keys": {
-  "description": "Input handling configuration.",
-  "type": "object",
-  "properties": {
+{
+  "urn:rdk:config:keys": {
+    "description": "Input handling configuration.",
+    "type": "object",
+    "properties": {
       "keyIntercept": { "type": "array", "items": { "type": "string" } },
       "keyCapture": { "type": "array", "items": { "type": "string" } },
       "keyMonitor": { "type": "array", "items": { "type": "string" } }
+    }
   }
 }
 ```
@@ -899,11 +955,13 @@ _Object Schema_
 _Examples_
 
 ```json
-"configuration": {
-  "urn:rdk:config:keys": {
-    "keyCapture": ["search", "voice"],
-    "keyCapture": ["search", "voice"],
-    "keyMonitor": ["volume+", "volume-"]
+{
+  "configuration": {
+    "urn:rdk:config:keys": {
+      "keyCapture": ["search", "voice"],
+      "keyCapture": ["search", "voice"],
+      "keyMonitor": ["volume+", "volume-"]
+    }
   }
 }
 ```
@@ -920,11 +978,13 @@ The requested window details for the app.
 _Object Schema_
 
 ```json
-"urn:rdk:config:window": {
-  "description": "Window details.",
-  "type": "object",
-  "properties": {
-    "virtualDisplaySize": { "type": "string" }
+{
+  "urn:rdk:config:window": {
+    "description": "Window details.",
+    "type": "object",
+    "properties": {
+      "virtualDisplaySize": { "type": "string" }
+    }
   }
 }
 ```
@@ -932,9 +992,11 @@ _Object Schema_
 _Examples_
 
 ```json
-"configuration": {
-  "urn:rdk:config:window": {
-    "virtualDisplaySize": 720,
+{
+  "configuration": {
+    "urn:rdk:config:window": {
+      "virtualDisplaySize": 720
+    }
   }
 }
 ```
@@ -964,20 +1026,22 @@ It's up to the app or service to actually listen on the ports and handle the net
 _Object Schema_
 
 ```json
-"urn:rdk:config:network": {
-  "description": "Network services configuration.",
-  "type": "object",
-  "properties": {
-    "type": "array",
-    "items": {
-      "type": "object",
-      "properties": {
-        "name": { "type": "string" },
-        "port": { "type": "integer" },
-        "protocol": { "type": "string" }
-        "type": { "type": "string" }
-      },
-      "required": ["name", "port", "protocol", "type"]
+{
+  "urn:rdk:config:network": {
+    "description": "Network services configuration.",
+    "type": "object",
+    "properties": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "port": { "type": "integer" },
+          "protocol": { "type": "string" },
+          "type": { "type": "string" }
+        },
+        "required": ["name", "port", "protocol", "type"]
+      }
     }
   }
 }
@@ -986,27 +1050,29 @@ _Object Schema_
 _Examples_
 
 ```json
-"configuration": {
-  "urn:rdk:config:network": [
-    {
-      "name": "netflix-mdx",
-      "port": 8009,
-      "protocol": "tcp",
-      "type": "public"
-    },
-    {
-      "name": "com.example.myapp.service"
-      "port": 1234,
-      "protocol": "tcp",
-      "type": "exported"
-    },
-    {
-      "name": "com.example.someotherapp.service"
-      "port": 4567,
-      "protocol": "tcp",
-      "type": "imported"
-    }
-  ]
+{
+  "configuration": {
+    "urn:rdk:config:network": [
+      {
+        "name": "netflix-mdx",
+        "port": 8009,
+        "protocol": "tcp",
+        "type": "public"
+      },
+      {
+        "name": "com.example.myapp.service",
+        "port": 1234,
+        "protocol": "tcp",
+        "type": "exported"
+      },
+      {
+        "name": "com.example.someotherapp.service",
+        "port": 4567,
+        "protocol": "tcp",
+        "type": "imported"
+      }
+    ]
+  }
 }
 ```
 
@@ -1024,30 +1090,34 @@ usage.
 _Object Schema_
 
 ```json
-"urn:rdk:config:memory": {
-  "description": "Memory quota. Value can be specified with G, M, or B suffix. If no suffix is provided, the value is assumed to be in bytes.",
-  "type": "object",
-  "properties": {
-    "system": {
-      "type": "string",
-      "pattern": "^\\d+[GMB]?$"
+{
+  "urn:rdk:config:memory": {
+    "description": "Memory quota. Value can be specified with G, M, or B suffix. If no suffix is provided, the value is assumed to be in bytes.",
+    "type": "object",
+    "properties": {
+      "system": {
+        "type": "string",
+        "pattern": "^\\d+[GMB]?$"
+      },
+      "gpu": {
+        "type": "string",
+        "pattern": "^\\d+[GMB]?$"
+      }
     },
-    "gpu": {
-      "type": "string",
-      "pattern": "^\\d+[GMB]?$"
-    }
-  },
-  "required": [ "system", "gpu" ]
+    "required": ["system", "gpu"]
+  }
 }
 ```
 
 _Examples_
 
 ```json
-"configuration": {
-  "urn:rdk:config:memory": {
-    "system": "256M",
-    "gpu": "128M"
+{
+  "configuration": {
+    "urn:rdk:config:memory": {
+      "system": "256M",
+      "gpu": "128M"
+    }
   }
 }
 ```
@@ -1058,37 +1128,41 @@ The requested storage quota for the app or service (in MB). This is optional and
 amount of storage for the app or service.
 
 - #### Max Local Storage Size
-  The maximum size of the local storage associaged with the app.
+  The maximum size of the local storage associated with the app.
 - #### Shared Storage App Id
   The App Id of the app that shared its local storage within this app.
 
 _Object Schema_
 
 ```json
-"urn:rdk:config:storage": {
-  "description": "Storage quota. Value can be specified with G, M, or B suffix. If no suffix is provided, the value is assumed to be in bytes.",
-  "type": "object",
-  "properties": {
-    "maxLocalStorage": {
-      "type": "string",
-      "pattern": "^\\d+[GMB]?$"
+{
+  "urn:rdk:config:storage": {
+    "description": "Storage quota. Value can be specified with G, M, or B suffix. If no suffix is provided, the value is assumed to be in bytes.",
+    "type": "object",
+    "properties": {
+      "maxLocalStorage": {
+        "type": "string",
+        "pattern": "^\\d+[GMB]?$"
+      },
+      "sharedStorageAppId": {
+        "type": "string",
+        "pattern": "^(?!.*\\.\\.)[a-zA-Z0-9](?:[a-zA-Z0-9._-]*[a-zA-Z0-9])?$"
+      }
     },
-    "sharedStorageAppId": {
-      "type": "string",
-      "pattern": "^(?!.*\\.\\.)[a-zA-Z0-9](?:[a-zA-Z0-9._-]*[a-zA-Z0-9])?$"
-    }
-  },
-  "required": [ "maxLocalStorage" ]
+    "required": ["maxLocalStorage"]
+  }
 }
 ```
 
 _Examples_
 
 ```json
-"configuration": {
-  "urn:rdk:config:storage": {
-    "maxLocalStorage": "32M",
-    "sharedStorageAppId": "com.sky.myapp2"
+{
+  "configuration": {
+    "urn:rdk:config:storage": {
+      "maxLocalStorage": "32M",
+      "sharedStorageAppId": "com.sky.myapp2"
+    }
   }
 }
 ```

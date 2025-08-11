@@ -11,7 +11,7 @@ This specification describes the metadata that is stored in a package file.
   "versionName": "1.2.3-beta",
   "name": "My Application",
   "packageType": "application",
-  "runtimeType": "html",
+  "packageSpecifier": "html",
   "entryPoint": "web/index.html",
   "dependencies": {
     "rdk.browser.wpe": ">=1.1.0"
@@ -107,18 +107,18 @@ This specification describes the metadata that is stored in a package file.
 
 ## Metadata Available per Package Type
 
-| Metadata                        | Base     | Runtime  | Application/Service |
-| ------------------------------- | -------- | -------- | ------------------- |
-| [id](#id)                       | Required | Required | Required            |
-| [version](#version)             | Required | Required | Required            |
-| [versionName](#versionName)     | Optional | Optional | Optional            |
-| [name](#name)                   | Optional | Optional | Optional            |
-| [packageType](#packageType)     | Required | Required | Required            |
-| [runtimeType](#runtimeType)     | Optional | Optional | Optional            |
-| [entryPoint](#entryPoint)       | Required | Required | Required            |
-| [dependencies](#dependencies)   | N/A      | Optional | Optional            |
-| [permissions](#permissions)     | N/A      | Optional | Optional            |
-| [configuration](#configuration) | N/A      | Optional | Optional            |
+| Metadata                              | Base     | Runtime  | Application/Service |
+| ------------------------------------- | -------- | -------- | ------------------- |
+| [id](#id)                             | Required | Required | Required            |
+| [version](#version)                   | Required | Required | Required            |
+| [versionName](#versionName)           | Optional | Optional | Optional            |
+| [name](#name)                         | Optional | Optional | Optional            |
+| [packageType](#packageType)           | Required | Required | Required            |
+| [packageSpecifier](#packageSpecifier) | Optional | Optional | Optional            |
+| [entryPoint](#entryPoint)             | Required | Required | Required            |
+| [dependencies](#dependencies)         | N/A      | Optional | Optional            |
+| [permissions](#permissions)           | N/A      | Optional | Optional            |
+| [configuration](#configuration)       | N/A      | Optional | Optional            |
 
 ## id
 
@@ -224,9 +224,9 @@ Package consist application:
 }
 ```
 
-## runtimeType
+## packageSpecifier
 
-A `runtimeType` informs about spefic runtime and can have one of the following values:
+An optional `packageSpecifier` informs about package specifier and can have one of the following values:
 
 - `html` - A package that is (or depends) on html (wpe) runtime.
 - `lightnig` - A package that is (or depends) on lightning (wpe) runtime.
@@ -236,13 +236,30 @@ A `runtimeType` informs about spefic runtime and can have one of the following v
 
 New types (and combinations) can be introduced.
 
-Thifield has multiple purpose:
+Optionally the combination of `packageType` and `packageSpecifier` can serve multiple purposes:
 
 - Identifies the type of the package.
-- It is used for associating an app or service package with a runtime package.
-- Disovery and filtering based on package type or available runtime.
-- Based on type, it can implicitly assume default dependency eg. `application/html` -> `dependencies": { "rdk.browser.wpe": ">=1.1.0" }`
-- Routing, not all packages needs to by run by Dobby.
+- It is used for associating an app or service package with a runtime package, eg. having
+
+```json
+{
+  "packageType": "application",
+  "packageSpecifier": "html"
+}
+```
+
+package requiresi `html` runtime.
+
+- Disovery and filtering based on package type or specifier, eg. only `html` applications.
+- Based on type, specifier combination, it can implicitly assume default dependency eg. `"packageSpecifier": "html` -> `dependencies": { "rdk.browser.wpe": ">=1.1.0" }`
+- Routing, not all packages needs to by run by Dobby, eg.
+
+```json
+{
+  "packageType": "service",
+  "packageSpecifier": "systemd"
+}
+```
 
 _Examples_
 
@@ -251,7 +268,7 @@ Package consist HTML Runtime (WPE):
 ```json
 {
   "pacakgeType": "runtime",
-  "runtimeType": "html"
+  "packageSpecifier": "html"
 }
 ```
 
@@ -260,7 +277,7 @@ Package consist application that relies on HTML Runtime:
 ```json
 {
   "packageType": "application",
-  "runtimeType": "html"
+  "packageSpecifier": "html"
 }
 ```
 

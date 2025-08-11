@@ -30,8 +30,8 @@
       "description": "Package type information.",
       "type": "string"
     },
-    "runtimeType": {
-      "description": "Runtime type information.",
+    "packageSpecifier": {
+      "description": "Specifier type information.",
       "type": "string"
     },
     "entryPoint": {

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema#",
-  "$id": "https://git.bskyb.com/sky-mw/package_metadata_schema/-/raw/main/package.schema.json",
+  "$id": "https://github.com/entos-xe/oci-package-spec/blob/main/schema/package.schema.json",
   "title": "Package Metadata Schema",
   "description": "Schema defines a JSON structure that accurately represents the package metadata for use with OCI Packaging Format.",
   "type": "object",

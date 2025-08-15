@@ -66,7 +66,7 @@ This specification describes the metadata that is stored in a package file.
       "variant": "v7",
       "os": "linux"
     },
-    "urn:rdk:config:keys": {
+    "urn:rdk:config:input-handling": {
       "keyCapture": ["play", "pause", "stop", "fastForward", "rewind"],
       "keyMonitor": ["volumeUp", "volumeDown", "mute"]
     },
@@ -588,7 +588,7 @@ Configuration object consist package specific configuration and settings.
 | [urn:rdk:config:dial](#urn:rdk:config:dial)                                   | N/A  | N/A     | Optional            |
 | [urn:rdk:config:application-lifecycle](#urn:rdk:config:application-lifecycle) | N/A  | N/A     | Optional            |
 | [urn:rdk:config:platform](#urn:rdk:config:platform)                           | N/A  | N/A     | Optional            |
-| [urn:rdk:config:keys](#urn:rdk:config:keys)                                   | N/A  | N/A     | Optional            |
+| [urn:rdk:config:input-handling](#urn:rdk:config:input-handling)               | N/A  | N/A     | Optional            |
 | [urn:rdk:config:network](#urn:rdk:config:network)                             | N/A  | N/A     | Optional            |
 | [urn:rdk:config:memory](#urn:rdk:config:memory)                               | N/A  | N/A     | Optional            |
 | [urn:rdk:config:storage](#urn:rdk:config:storage)                             | N/A  | N/A     | Optional            |
@@ -935,9 +935,9 @@ _Examples_
 }
 ```
 
-### urn:rdk:config:keys
+### urn:rdk:config:input-handling
 
-The keys configuration for the app. This is optional and allows the app to capture or be notified of certain
+The input handling configuration for the app. This is optional and allows the app to capture or be notified of certain
 input events.
 
 - #### Key Intercept Set
@@ -957,7 +957,7 @@ _Object Schema_
 
 ```json
 {
-  "urn:rdk:config:keys": {
+  "urn:rdk:config:input-handling": {
     "description": "Input handling configuration.",
     "type": "object",
     "properties": {
@@ -974,7 +974,7 @@ _Examples_
 ```json
 {
   "configuration": {
-    "urn:rdk:config:keys": {
+    "urn:rdk:config:input-handling": {
       "keyCapture": ["search", "voice"],
       "keyCapture": ["search", "voice"],
       "keyMonitor": ["volume+", "volume-"]

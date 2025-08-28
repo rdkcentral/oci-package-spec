@@ -27,15 +27,7 @@ This specification describes the metadata that is stored in a package file.
     "urn:rdk:permission:external-storage::read",
     "urn:rdk:permission:external-storage::write",
     "urn:rdk:permission:display-overlay",
-    "urn:rdk:permission:compositor",
-    "urn:entos:permission:as-access:5",
-    "urn:entos:permission:as-player",
-    "urn:entos:permission:mediarite:api",
-    "urn:entos:permission:airplay",
-    "urn:entos:permission:chromecast",
-    "urn:entos:permission:bearer-token-authentication",
-    "urn:entos:permission:sky-live",
-    "urn:entos:permission:entitlements-info"
+    "urn:rdk:permission:compositor"
   ],
   "configuration": {
     "urn:rdk:config:overrides": {
@@ -371,29 +363,20 @@ This feature is helpful for local offline development and creating tests that re
 These array represents permissions that an `application` or `service` package is requesting. Runtime
 packages do not request permissions, but the apps or services that run within the runtime may request them.
 
-| Permission \*)                                                                                        |
-| ----------------------------------------------------------------------------------------------------- |
-| _RDK_                                                                                                 |
-| [urn:rdk:permission:home-app](#urn:rdk:permission:home-app)                                           |
-| [urn:rdk:permission:internet](#urn:rdk:permission:internet)                                           |
-| [urn:rdk:permission:firebolt](#urn:rdk:permission:firebolt)                                           |
-| [urn:rdk:permission:thunder](#urn:rdk:permission:thunder)                                             |
-| [urn:rdk:permission:rialto](#urn:rdk:permission:rialto)                                               |
-| [urn:rdk:permission:game-controller](#urn:rdk:permission:game-controller)                             |
-| [urn:rdk:permission:timeshift-buffer](#urn:rdk:permission:timeshift-buffer)                           |
-| [urn:rdk:permission:external-storage::read](#urn:rdk:permission:external-storage::read)               |
-| [urn:rdk:permission:external-storage::write](#urn:rdk:permission:external-storage::write)             |
-| [urn:rdk:permission:display-overlay](#urn:rdk:permission:display-overlay)                             |
-| [urn:rdk:permission:compositor](#urn:rdk:permission:compositor)                                       |
-| _ENTOS_                                                                                               |
-| [urn:entos:permission:as-access:(n)](<#urn:entos:permission:as-access:(n)>)                           |
-| [urn:entos:permission:as-player](#urn:entos:permission:as-player)                                     |
-| [urn:entos:permission:mediarite:api](#urn:entos:permission:mediarite:api)                             |
-| [urn:entos:permission:airplay](#urn:entos:permission:airplay)                                         |
-| [urn:entos:permission:chromecast](#urn:entos:permission:chromecast)                                   |
-| [urn:entos:permission:bearer-token-authentication](#urn:entos:permission:bearer-token-authentication) |
-| [urn:entos:permission:sky-live](#urn:entos:permission:sky-live)                                       |
-| [urn:entos:permission:entitlements-info](#urn:entos:permission:entitlements-info)                     |
+| Permission \*)                                                                            |
+| ----------------------------------------------------------------------------------------- |
+| _RDK_                                                                                     |
+| [urn:rdk:permission:home-app](#urn:rdk:permission:home-app)                               |
+| [urn:rdk:permission:internet](#urn:rdk:permission:internet)                               |
+| [urn:rdk:permission:firebolt](#urn:rdk:permission:firebolt)                               |
+| [urn:rdk:permission:thunder](#urn:rdk:permission:thunder)                                 |
+| [urn:rdk:permission:rialto](#urn:rdk:permission:rialto)                                   |
+| [urn:rdk:permission:game-controller](#urn:rdk:permission:game-controller)                 |
+| [urn:rdk:permission:timeshift-buffer](#urn:rdk:permission:timeshift-buffer)               |
+| [urn:rdk:permission:external-storage::read](#urn:rdk:permission:external-storage::read)   |
+| [urn:rdk:permission:external-storage::write](#urn:rdk:permission:external-storage::write) |
+| [urn:rdk:permission:display-overlay](#urn:rdk:permission:display-overlay)                 |
+| [urn:rdk:permission:compositor](#urn:rdk:permission:compositor)                           |
 
 \*) List is extensible
 
@@ -477,78 +460,6 @@ The application is requesting access to the Composition API. This allows the app
 composition of the screen for all apps. In this sense, it acts like a basic window manager and is typically used
 in conjunction with the `HomeApp` privilege to enable launcher or desktop-like functionality.
 
-### ENTOS
-
-- ### urn:entos:permission:as-access:(n)
-
-_AS Access Permission_
-
-The app or service is requesting access to the AS services with the given level. Only one of these privileges
-will be set at any given time.
-
-In practical terms, this means the app or service can access AS on one of its specified ports.
-
-Possible values are:
-
-```
-urn:entos:permission:as-access:1
-urn:entos:permission:as-access:2
-urn:entos:permission:as-access:3
-urn:entos:permission:as-access:4
-urn:entos:permission:as-access:5
-
-```
-
-See [AS Set Menus](https://www.stb.bskyb.com/confluence/display/2016/AS+Set+Menus) (Sky internal) for more information.
-
-- ### urn:entos:permission:as-player
-
-The application requires access to the ASPlayer Composition API. This allows the app to control playback of A/V
-content generated by the ASPlayer.
-
-Note: This privilege is only available on platforms that support the ASPlayer. It is considered a legacy
-requirement; going forward, all video surfaces are expected to be handled in a more generic way.
-
-Note: This does not control access to the ASPlayer REST API; access to that is managed through the
-`ASAccessLevelX` privileges.
-
-- ### urn:entos:permission:mediarite:api
-
-_Mediarite Permission_
-
-The app or service requires access to the Mediarite API (MAPI) tuner sub-system.
-
-- ### urn:entos:permission:airplay
-
-_AirPlay Permission_
-
-The app or service requires access to the AirPlay services.
-
-- ### urn:entos:permission:chromecast
-
-_Chromecast Permission_
-
-The application requires access to Chromecast services.
-
-- ### urn:entos:permission:bearer-token-authentication
-
-_Bearer Token Authentication Permission_
-
-The application requires the ability to request a bearer token from the system for authentication to backend systems.
-
-- ### urn:entos:permission:sky-live
-
-_Sky Live Permission_
-
-The application requires access to Sky Live system device if available.
-
-- ### urn:entos:permission:entitlements-info
-
-_Entitlements Info Permission_
-
-The application requires access to information about the current entitlements set on the device.
-This does not grant the app permission to modify entitlements, only to read the current entitlement information.
-
 _Examples_
 
 ```json
@@ -564,15 +475,7 @@ _Examples_
     "urn:rdk:permission:external-storage::read",
     "urn:rdk:permission:external-storage::write",
     "urn:rdk:permission:display-overlay",
-    "urn:rdk:permission:compositor",
-    "urn:entos:permission:as-access:5",
-    "urn:entos:permission:as-player",
-    "urn:entos:permission:mediarite:api",
-    "urn:entos:permission:airplay",
-    "urn:entos:permission:chromecast",
-    "urn:entos:permission:bearer-token-authentication",
-    "urn:entos:permission:sky-live",
-    "urn:entos:permission:entitlements-info"
+    "urn:rdk:permission:compositor"
   ]
 }
 ```

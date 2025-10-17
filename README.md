@@ -1,5 +1,13 @@
 # OCI Package Specification
 
+## Quick Summary
+
+**TL;DR:** This specification defines how to package applications, runtimes, and resources as OCI (Open Container Initiative) artifacts for RDK-based devices. It provides:
+- **Standardized packaging format** using OCI artifacts with metadata (config) and content (payload) layers
+- **Package metadata schema** for defining app/runtime properties (ID, version, dependencies, permissions, resource requirements)
+- **Multiple package types** including applications, runtimes, services, and resources
+- **Support for various content formats** (tar, tar+gzip, zip, EROFS+dm-verity)
+
 This repository contains the OCI Package Specification, which defines a standard for packaging applications, runtimes, and other resources as OCI (Open Container Initiative) artifacts. This specification is designed to provide a clear and consistent way to bundle and distribute software components.
 
 ## Specification Documents

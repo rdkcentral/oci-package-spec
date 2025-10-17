@@ -3,7 +3,7 @@
 ## Quick Summary
 
 **TL;DR:** This specification defines how to package applications, runtimes, and resources as OCI (Open Container Initiative) artifacts for RDK-based devices. It provides:
-- **Standardized packaging format** using OCI artifacts with metadata (config) and content (payload) layers
+- **Standardized packaging format** using OCI artifacts with config layer (metadata) and content layer (package data)
 - **Package metadata schema** for defining app/runtime properties (ID, version, dependencies, permissions, resource requirements)
 - **Multiple package types** including applications, runtimes, services, and resources
 - **Support for various content formats** (tar, tar+gzip, zip, EROFS+dm-verity)

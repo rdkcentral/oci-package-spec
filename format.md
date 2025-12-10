@@ -23,6 +23,7 @@ The **content** layer also has a defined media type, depending on payload:
 
 | Media Types                                                 | Description                                                                                                                                                                                   |
 | ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| application/vnd.oci.empty.v1+json                           | Empty data. No content layer file, see [empty descriptor](https://github.com/opencontainers/image-spec/blob/main/manifest.md#guidance-for-an-empty-descriptor).                               |
 | application/vnd.rdk.package.content.layer.v1.tar            | Package data as a tarball                                                                                                                                                                     |
 | application/vnd.rdk.package.content.layer.v1.tar+gzip       | Package data as gzipped tarball                                                                                                                                                               |
 | application/vnd.rdk.package.content.layer.v1.zip            | Package data as zip file. This would be the same as the traditional W3C widget zip contents, but without the config.xml and signature1.xml file you'd typically have in a traditional widget. |
@@ -33,6 +34,7 @@ Each layer is associated with its own Media Type, which is stored in the OCI Des
 | Component Name       | Type                     | Key Media Types                                                                                                                                                                                                              | Description                                                                                                                                                                                                                                                                   |
 | -------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Package OCI Artifact | JSON Object              | application/vnd.rdk.package.config.v1+json                                                                                                                                                                                   | Custom package metadata - [package.json](metadata.json)                                                                                                                                                                                                                       |
+|                      | JSON Object                     | application/vnd.oci.empty.v1+json                                                                                                                                                                                            | _Application_<br><br> Is for packages that consist only out of metadata (eg. web apps) - config layer and hence have no real content layer - payload data. As defined by the OCI Image Specification, the corresponding content layer then consists solely of an empty JSON object, being {}                           |
 |                      | binary data (byte array) | application/vnd.rdk.package.content.layer.v1.tar<br>application/vnd.rdk.package.content.layer.v1.tar+gzip<br>application/vnd.rdk.package.content.layer.v1.zip<br>application/vnd.rdk.package.content.layer.v1.erofs+dmverity | _Runtime_<br><br>Consist specific binaries, resources, configurations and shared libraries that build up final runtime, eg.<br><br>- rdkbrowser<br>- cobalt<br>- flutter<br>- luna<br><br>_Application_<br><br>Contains application binary, resources, shared libraries, etc. |
 
 OCI Artifact Manifest also consist artifactType always set to:
@@ -126,6 +128,71 @@ Browser Test Tool example application package.
 ├── index.html
 ├── override.js
 ├── rdk.config
+```
+
+#### Application Package - web application with no package data
+
+##### Package Manifest
+
+The following manifest provides an example of the OCI Artifact descriptors for an Application Package stored according to the specification:
+
+```json
+{
+  "schemaVersion": 2,
+  "mediaType": "application/vnd.oci.image.manifest.v1+json",
+  "artifactType": "application/vnd.rdk.package+type",
+  "config": {
+    "mediaType": "application/vnd.rdk.package.config.v1+json",
+    "digest": "sha256:<digest>",
+    "size": "<size>",
+    "annotations": {
+      "org.opencontainers.image.title": "package.json"
+    }
+  },
+  "layers": [
+    {
+      "mediaType": "application/vnd.oci.empty.v1+json",
+      "digest": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "size": 2
+    }
+  ]
+}
+```
+
+##### Package Metadata
+
+Web application with no package data example application package metadata.
+
+```json
+{
+  "id": "com.rdkcentral.wiki",
+  "version": "0.1.0",
+  "name": "RDK Central Wiki",
+  "packageType": "application",
+  "packageSpecifier": "html",
+  "entryPoint": "https://wiki.rdkcentral.com/",
+  "dependencies": {
+    "com.sky.rdkbrowser": ">=2.7.2-kirkstone"
+  },
+  "permissions": [
+    "urn:rdk:permission.internet",
+    "urn:rdk:permission:firebolt"
+  ],
+  "configuration": {
+    "urn:rdk:config:platform": {
+      "architecture": "arm",
+      "variant": "v7",
+      "os": "linux"
+    },
+    "urn:rdk:config:memory": {
+      "system": "450M",
+      "gpu": "200M"
+    },
+    "urn:rdk:config:storage": {
+      "maxLocalStorage": "32M"
+    }
+  }
+}
 ```
 
 #### Runtime Package - rdkbrowser

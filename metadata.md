@@ -13,6 +13,7 @@ This specification describes the metadata that is stored in a package file.
   "packageType": "application",
   "packageSpecifier": "html",
   "entryPoint": "web/index.html",
+  "entryArgs": ["--some-option=true"],
   "dependencies": {
     "rdk.browser.wpe": ">=1.1.0"
   },
@@ -108,6 +109,7 @@ This specification describes the metadata that is stored in a package file.
 | [packageType](#packageType)           | Required | Required | Required            |
 | [packageSpecifier](#packageSpecifier) | Optional | Optional | Optional            |
 | [entryPoint](#entryPoint)             | Required | Required | Required            |
+| [entryArgs](#entryArgs)               | Optional | Optional | Optional            |
 | [dependencies](#dependencies)         | N/A      | Optional | Optional            |
 | [permissions](#permissions)           | N/A      | Optional | Optional            |
 | [configuration](#configuration)       | N/A      | Optional | Optional            |
@@ -299,6 +301,28 @@ _Examples_
 ```json
 {
   "entryPoint": "web/index.html"
+}
+```
+
+## entryArgs
+
+Optional arguments for the entry point. It is an array of strings that is used together with `entryPoint`.
+Empty array or absence of this field means no arguments are passed to the entry point.
+
+_Examples_
+
+```json
+{
+  "entryArgs": ["--some-option=true"]
+}
+```
+
+```json
+{
+  "entryArgs": [
+    "--some-option=true",
+    "https://ytlr-cert.appspot.com/2021/main.html"
+  ]
 }
 ```
 

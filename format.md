@@ -277,6 +277,7 @@ Browser example runtime package.
 ## Signing
 
 Packages MAY be signed using the Cosign "simple signing" format. This allows for offline verification of packages without reliance on an OCI registry.
+The signature follows [Cosign Signature Specification](https://github.com/sigstore/cosign/blob/main/specs/SIGNATURE_SPEC.md).
 
 ### Signature Artifact
 
@@ -297,13 +298,15 @@ The Signature Manifest consists of a single layer containing the signed payload.
 The signature layer MUST use the media type:
 `application/vnd.dev.cosign.simplesigning.v1+json`
 
-The layer descriptor MUST contain the following annotations:
+The layer descriptor contains the following annotations:
 
-| Annotation Key                     | Description                                            |
-| ---------------------------------- | ------------------------------------------------------ |
-| `dev.cosignproject.cosign/signature` | The base64-encoded signature of the layer's content (payload). |
-| `dev.sigstore.cosign/certificate`    | The PEM-encoded X.509 certificate used for signing.    |
-| `dev.sigstore.cosign/chain`          | (Optional) The PEM-encoded certificate chain.          |
+| Annotation Key                       | Requirement | Description                                                    |
+| ------------------------------------ | ----------- | -------------------------------------------------------------- |
+| `dev.cosignproject.cosign/signature` | Required    | The base64-encoded signature of the layer's content (payload). |
+| `dev.sigstore.cosign/certificate`    | Optional    | The PEM-encoded X.509 certificate used for signing.            |
+| `dev.sigstore.cosign/chain`          | Optional    | The PEM-encoded certificate chain.                             |
+
+`dev.sigstore.cosign/certificate` and `dev.sigstore.cosign/chain` are not required. It is possible to just sign with public / private key, rather than PKI certificate chains.
 
 #### Signature Payload
 
@@ -323,6 +326,10 @@ The content of the signature layer (the blob) is a JSON object with the followin
   "optional": null
 }
 ```
+
+`docker-reference` is a string that identifies the signed artifact. It does not
+have to follow any specific format, but it is recommended to use a format that clearly indicates the artifact being
+signed (e.g., `com.sky.rdkbrowser:2.7.2-kirkstone`).
 
 ### Key Generation (Informative)
 
@@ -414,7 +421,7 @@ The index links the target package and its signature.
 {
   "critical": {
     "identity": {
-      "docker-reference": "10.211.55.6:5001/tcpconnect"
+      "docker-reference": "com.sky.rdkbrowser:2.7.2-kirkstone"
     },
     "image": {
       "docker-manifest-digest": "sha256:4161227e2a40097d5e00150b6027e86ea78a03f3668d41cf240173dc9b199614"

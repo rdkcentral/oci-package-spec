@@ -1,15 +1,24 @@
-# OCI Package Specification
+# RALF (RDK Application Layer Format) Specification
 
-This repository contains the OCI Package Specification, which defines a standard for packaging applications, runtimes, and other resources as OCI (Open Container Initiative) artifacts. This specification is designed to provide a clear and consistent way to bundle and distribute software components.
+This repository contains the **RALF (RDK Application Layer Format) Specification**, which defines a standard for packaging applications, runtimes, and other resources as OCI (Open Container Initiative) artifacts for RDK devices.
+
+RALF packages are distributed as single files with the `.ralf` extension (ZIP or Tarball) containing a standard OCI Image Layout.
 
 ## Specification Documents
 
-*   **[Package Format Specification (format.md)](format.md):** This document describes the structure of an OCI package, including the different layers and their corresponding media types. It details how to bundle package payloads and metadata into a single OCI artifact.
+*   **[RALF Format Specification (format.md)](format.md):** This document describes the structure of a RALF package (`.ralf`), including the file format (ZIP/Tar), internal OCI layout, layers, media types, and the **Cosign-based signing** mechanism.
 
-*   **[Package Metadata Specification (metadata.md)](metadata.md):** This document defines the metadata that can be included in a package. This metadata provides essential information about the package, such as its name, version, dependencies, and required permissions.
+*   **[Package Metadata Specification (metadata.md)](metadata.md):** This document defines the metadata that can be included in a package's config layer. This metadata provides essential information such as package name, version, dependencies, permissions, and resource requirements.
 
 *   **[Package Metadata JSON Schema (package.schema.json)](schema/package.schema.json):** This file provides a JSON schema for validating the package metadata.
 
+## Key Features
+
+*   **OCI Standard**: Built on open standards (OCI Image Spec, OCI Image Layout).
+*   **Single File Distribution**: Packages are bundled as `.ralf` files (ZIP or Tarball).
+*   **Secure**: Supports offline verification using Cosign-style signatures.
+*   **Flexible**: Supports various payloads including Tarballs and EROFS images with dm-verity.
+
 ## Contributing
 
-Contributions to the OCI Package Specification are welcome. If you have any suggestions or improvements, please feel free to open an issue or submit a pull request.
+Contributions to the RALF Specification are welcome. If you have any suggestions or improvements, please feel free to open an issue or submit a pull request.

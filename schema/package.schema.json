@@ -10,6 +10,11 @@
       "type": "string",
       "pattern": "^(?!.*\\.\\.)[a-zA-Z0-9](?:[a-zA-Z0-9._-]*[a-zA-Z0-9])?$"
     },
+    "specVersion": {
+      "description": "The version of the RALF specification this package adheres to.",
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
     "version": {
       "description": "The semantic version number of the package, this is strictly checked to ensure it contains numbers separated by periods",
       "type": "string",
@@ -68,6 +73,6 @@
       "additionalProperties": true
     }
   },
-  "required": ["id", "version", "packageType", "entryPoint"],
+  "required": ["id", "specVersion", "version", "packageType", "entryPoint"],
   "additionalProperties": false
 }

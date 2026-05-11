@@ -5,6 +5,20 @@ All notable changes to the RALF Specification will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] - 2026-05-11
+
+### Changed
+- Schema canonical URL now tracks `main` on raw.githubusercontent.com
+  instead of GitHub Pages. The schema `$id`, README, format.md, and
+  RELEASING.md were updated accordingly. The GitHub Release asset
+  (`package.schema-vX.Y.Z.json`) remains the version-pinned source.
+
+### Removed
+- GitHub Pages deploy steps from the release workflow. `deploy-pages@v4`
+  requires an `environment:` block, but the `github-pages` environment's
+  protection rules in this repository block tag-triggered deploys. Per-
+  version schema availability is preserved via Release assets.
+
 ## [1.0.2] - 2026-05-11
 
 ### Fixed

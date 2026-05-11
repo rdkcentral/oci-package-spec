@@ -36,13 +36,12 @@ constitutes MAJOR/MINOR/PATCH changes.
    - verify that `CHANGELOG.md` and the doc version headers agree with the tag (`vX.Y.Z` → `X.Y.Z`);
    - compile the schema with `ajv`;
    - extract the matching CHANGELOG section as release notes;
-   - publish a GitHub Release with `package.schema-vX.Y.Z.json` and `ralf-spec-X.Y.Z.tar.gz` attached;
-   - deploy the schema to GitHub Pages.
+   - publish a GitHub Release with `package.schema-vX.Y.Z.json` and `ralf-spec-X.Y.Z.tar.gz` attached.
 
 6. **Verify the release.**
    - Confirm the GitHub Release page lists both artifacts and that pre-release tags are marked as such.
-   - Confirm the canonical schema URL responds with the new content:
-     `https://rdkcentral.github.io/oci-package-spec/schema/v1/package.schema.json`
+   - Confirm the canonical (main-tracking) schema URL serves the new content:
+     `https://raw.githubusercontent.com/rdkcentral/oci-package-spec/main/schema/v1/package.schema.json`
    - Optionally validate a sample package against the published schema:
      ```bash
      npx ajv-cli@5 validate -s schema/v1/package.schema.json -d sample.json --spec=draft2020
@@ -54,8 +53,6 @@ constitutes MAJOR/MINOR/PATCH changes.
   CHANGELOG on `main` in a follow-up PR, delete the bad tag, then retag.
 - **"version header mismatch"** — one of the doc files still shows the previous version. Same fix
   as above.
-- **Pages deploy fails on first run** — GitHub Pages must be enabled for the repository with the
-  source set to "GitHub Actions" in Settings → Pages.
 
 ## Tag and branch protection (one-time setup)
 

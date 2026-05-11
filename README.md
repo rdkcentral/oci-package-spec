@@ -1,5 +1,5 @@
 # RALF (RDK Application Layer Format) Specification
-**Version: 1.0.2**
+**Version: 1.0.3**
 
 This repository contains the **RALF (RDK Application Layer Format) Specification**, which defines a standard for packaging applications, runtimes, and other resources as OCI (Open Container Initiative) artifacts for RDK devices.
 
@@ -11,7 +11,7 @@ RALF packages are distributed as single files with the `.ralf` extension (ZIP or
 
 *   **[Package Metadata Specification (metadata.md)](metadata.md):** This document defines the metadata that can be included in a package's config layer. This metadata provides essential information such as package name, version, dependencies, permissions, and resource requirements.
 
-*   **[Package Metadata JSON Schema (schema/v1/package.schema.json)](schema/v1/package.schema.json):** JSON Schema for validating the package metadata. Schemas are MAJOR-versioned; the canonical URL for the v1 schema is `https://rdkcentral.github.io/oci-package-spec/schema/v1/package.schema.json`.
+*   **[Package Metadata JSON Schema (schema/v1/package.schema.json)](schema/v1/package.schema.json):** JSON Schema for validating the package metadata. Schemas are MAJOR-versioned; the canonical URL for the v1 schema is `https://raw.githubusercontent.com/rdkcentral/oci-package-spec/main/schema/v1/package.schema.json`. Each tagged release also attaches `package.schema-vX.Y.Z.json` as a GitHub Release asset.
 
 *   **[Changelog (CHANGELOG.md)](CHANGELOG.md):** Notable changes per release.
 

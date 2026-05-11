@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema#",
-  "$id": "https://rdkcentral.github.io/oci-package-spec/schema/v1/package.schema.json",
+  "$id": "https://raw.githubusercontent.com/rdkcentral/oci-package-spec/main/schema/v1/package.schema.json",
   "title": "Package Metadata Schema",
   "description": "Schema defines a JSON structure that accurately represents the package metadata for use with OCI Packaging Format.",
   "type": "object",

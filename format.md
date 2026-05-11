@@ -1,5 +1,5 @@
 # Package Format Specification
-**Version: 1.0.2**
+**Version: 1.0.3**
 
 ## Versioning
 
@@ -22,8 +22,11 @@ MAJOR `N`, regardless of its MINOR/PATCH value. Unknown OPTIONAL fields introduc
 releases are validated against the same schema path; validators MAY ignore semantic content they do not
 understand but MUST NOT reject the payload solely on that basis.
 
-The canonical schema URL is served by GitHub Pages and resolves at:
-`https://rdkcentral.github.io/oci-package-spec/schema/v1/package.schema.json`
+The canonical schema URL tracks `main` on GitHub and resolves at:
+`https://raw.githubusercontent.com/rdkcentral/oci-package-spec/main/schema/v1/package.schema.json`
+
+For a pinned, immutable copy of the schema as it shipped with a specific spec version, use the
+release asset URL (see below).
 
 ### Releases
 
@@ -31,8 +34,7 @@ Releases are tagged on `main` as annotated tags of the form `vMAJOR.MINOR.PATCH`
 `v1.1.0-rc.1`). Each release publishes:
 - a GitHub Release with notes extracted from `CHANGELOG.md`;
 - the schema file as a release asset (`package.schema-vMAJOR.MINOR.PATCH.json`);
-- a tarball of the spec documents (`ralf-spec-MAJOR.MINOR.PATCH.tar.gz`);
-- the schema served on GitHub Pages at the canonical URL above.
+- a tarball of the spec documents (`ralf-spec-MAJOR.MINOR.PATCH.tar.gz`).
 
 See [RELEASING.md](RELEASING.md) for the maintainer runbook.
 

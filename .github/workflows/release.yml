@@ -8,12 +8,6 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: false
 
 jobs:
   release:
@@ -73,18 +67,3 @@ jobs:
           files: |
             dist/package.schema-*.json
             dist/ralf-spec-*.tar.gz
-
-      - name: Stage GitHub Pages site
-        run: |
-          mkdir -p site/schema
-          cp -r schema/v1 site/schema/v1
-          cp -r schema/v1 site/schema/latest
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: site
-
-      - name: Deploy to GitHub Pages
-        id: pages
-        uses: actions/deploy-pages@v4

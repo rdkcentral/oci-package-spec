@@ -1,0 +1,93 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+      - 'v*.*.*-*'
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.pages.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract version from tag
+        id: ver
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Verify version consistency across files
+        run: |
+          set -euo pipefail
+          V="${{ steps.ver.outputs.version }}"
+          fail() { echo "::error::$1"; exit 1; }
+          grep -Fq "## [$V]" CHANGELOG.md    || fail "CHANGELOG.md missing entry [$V]"
+          grep -Fq "Version: $V" README.md   || fail "README.md version header mismatch (expected $V)"
+          grep -Fq "Version: $V" format.md   || fail "format.md version header mismatch (expected $V)"
+          grep -Fq "Version: $V" metadata.md || fail "metadata.md version header mismatch (expected $V)"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate schema compiles
+        run: npx --yes ajv-cli@5 compile -s schema/v1/package.schema.json --spec=draft2020
+
+      - name: Extract changelog section for this release
+        run: |
+          V="${{ steps.ver.outputs.version }}"
+          awk -v v="$V" '
+            $0 ~ "^## \\["v"\\]" { flag=1; next }
+            flag && /^## \[/ { exit }
+            flag { print }
+          ' CHANGELOG.md > RELEASE_NOTES.md
+          test -s RELEASE_NOTES.md || { echo "::error::Empty release notes for $V"; exit 1; }
+
+      - name: Package release artifacts
+        run: |
+          V="${{ steps.ver.outputs.version }}"
+          mkdir -p dist
+          cp schema/v1/package.schema.json "dist/package.schema-v${V}.json"
+          tar czf "dist/ralf-spec-${V}.tar.gz" \
+            README.md format.md metadata.md CHANGELOG.md schema/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: RALF ${{ steps.ver.outputs.version }}
+          body_path: RELEASE_NOTES.md
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          files: |
+            dist/package.schema-*.json
+            dist/ralf-spec-*.tar.gz
+
+      - name: Stage GitHub Pages site
+        run: |
+          mkdir -p site/schema
+          cp -r schema/v1 site/schema/v1
+          cp -r schema/v1 site/schema/latest
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy to GitHub Pages
+        id: pages
+        uses: actions/deploy-pages@v4

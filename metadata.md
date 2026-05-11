@@ -1,4 +1,5 @@
 # Package Metadata Specification
+**Version: 1.0.0**
 
 This specification describes the metadata that is stored in a package file.
 
@@ -150,14 +151,25 @@ _Examples_
 
 ## specVersion
 
-The `specVersion` field identifies the version of the RALF specification that this package metadata adheres to.
-It must follow semantic versioning (X.Y.Z).
+The `specVersion` field identifies the version of the RALF specification that this package metadata
+adheres to. It MUST follow Semantic Versioning in the form `MAJOR.MINOR.PATCH`, optionally followed by a
+pre-release tag (e.g. `1.1.0-rc.1`).
+
+Validators MUST select the schema directory matching the declared MAJOR (e.g. `specVersion: "1.2.0"`
+validates against `schema/v1/package.schema.json`). A validator implementing MAJOR `N` MUST accept any
+payload whose `specVersion` has MAJOR `N`, regardless of its MINOR/PATCH.
 
 _Examples_
 
 ```json
 {
   "specVersion": "1.0.0"
+}
+```
+
+```json
+{
+  "specVersion": "1.1.0-rc.1"
 }
 ```
 

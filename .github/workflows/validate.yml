@@ -1,0 +1,26 @@
+name: Validate
+
+on:
+  pull_request:
+    paths:
+      - 'schema/**'
+      - '*.md'
+      - '.github/workflows/**'
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  schema:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Compile schema with ajv
+        run: npx --yes ajv-cli@5 compile -s schema/v1/package.schema.json --spec=draft2020

@@ -1,6 +1,41 @@
 # Package Format Specification
 **Version: 1.0.0**
 
+## Versioning
+
+The RALF Specification follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Each released
+spec version is identified as `MAJOR.MINOR.PATCH` and a package MUST declare the version it was authored
+against via the `specVersion` metadata field (see [metadata.md](metadata.md#specversion)).
+
+| Component | Bump triggers                                                                                                                                |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| MAJOR     | Backwards-incompatible change. A field becomes required, is removed, or is renamed. A media type is removed/renamed. Manifest or signature payload shape changes. |
+| MINOR     | Backwards-compatible additive change. A new optional field, optional media type, or optional annotation is introduced.                       |
+| PATCH     | Editorial change only. Typos, clarifications, example fixes. No normative behaviour change.                                                  |
+
+### Schema Compatibility
+
+The JSON schema is published under MAJOR-versioned paths: `schema/v1/package.schema.json`,
+`schema/v2/package.schema.json`, etc. The schema for a given MAJOR is updated in place across MINOR/PATCH
+releases. A validator implementing MAJOR `N` MUST accept any payload whose declared `specVersion` has
+MAJOR `N`, regardless of its MINOR/PATCH value. Unknown OPTIONAL fields introduced in later MINOR
+releases are validated against the same schema path; validators MAY ignore semantic content they do not
+understand but MUST NOT reject the payload solely on that basis.
+
+The canonical schema URL is served by GitHub Pages and resolves at:
+`https://rdkcentral.github.io/oci-package-spec/schema/v1/package.schema.json`
+
+### Releases
+
+Releases are tagged on `main` as annotated tags of the form `vMAJOR.MINOR.PATCH` (pre-releases use
+`v1.1.0-rc.1`). Each release publishes:
+- a GitHub Release with notes extracted from `CHANGELOG.md`;
+- the schema file as a release asset (`package.schema-vMAJOR.MINOR.PATCH.json`);
+- a tarball of the spec documents (`ralf-spec-MAJOR.MINOR.PATCH.tar.gz`);
+- the schema served on GitHub Pages at the canonical URL above.
+
+See [RELEASING.md](RELEASING.md) for the maintainer runbook.
+
 ## Description
 
 ### Overview

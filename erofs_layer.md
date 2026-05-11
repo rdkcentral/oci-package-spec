@@ -1,56 +1,121 @@
 # EROFS Layer Specification for OCI Packages
 
-The **EROFS (Enhanced Read-Only File System)** is utilized as a high-performance, immutable layer format within the OCI package specification. It is designed to bridge the gap between storage efficiency and high-speed random access, particularly in resource-constrained environments like Set-Top Boxes (STB) and IoT devices.
+EROFS (Enhanced Read-Only File System) is the immutable content-layer format used by RALF packages that must support direct loopback mount, dm-verity integrity, and zero-copy random access on resource-constrained targets (STB, IoT).
 
 ## 1. Overview
-EROFS utilizes a **fixed-sized output compression** strategy, fitting variable amounts of input data into fixed-sized physical blocks on the disk. This design minimizes I/O amplification and memory-resident overhead compared to traditional formats like SquashFS, which focus solely on extreme image size reduction.
 
-## 2. Technical Configuration
-The following technical parameters are required for generating OCI-compliant EROFS layers using **erofs-utils**. These settings prioritize low-latency "Time to First Byte" and ensure consistent container ownership.
+EROFS uses fixed-sized output compression: variable input fits into fixed physical blocks. Compared to SquashFS this minimises I/O amplification and resident memory at the cost of slightly larger images, which matches the runtime profile of RDK devices.
+
+When dm-verity is appended, the hash tree is written immediately after the EROFS image in the same blob. The root hash, salt and hash-tree offset are carried as OCI descriptor annotations (see section 6).
+
+## 2. Media Types
+
+The content-layer media type encodes the compressor so headend and tooling can reject or transcode packages a target kernel cannot mount.
+
+| Media Type | Compressor | Notes |
+| :--- | :--- | :--- |
+| `application/vnd.rdk.package.content.layer.v1.erofs.lz4+dmverity`  | `lz4hc` (encode) / `lz4` (decode) | Baseline. Supported on every EROFS-enabled kernel. |
+| `application/vnd.rdk.package.content.layer.v1.erofs.zstd+dmverity` | `zstd` | Requires `CONFIG_EROFS_FS_ZIP_ZSTD` (Linux 6.x). |
+| `application/vnd.rdk.package.content.layer.v1.erofs.nocmpr+dmverity` | none | Uncompressed. Smallest CPU cost, largest image. |
+
+The legacy umbrella type `application/vnd.rdk.package.content.layer.v1.erofs+dmverity` is deprecated and MUST NOT be produced by new tooling. Readers MAY accept it for backwards compatibility and treat it as `erofs.lz4+dmverity`.
+
+## 3. Technical Configuration
+
+Parameters below are normative for RALF EROFS layers. Tooling MUST set them when invoking `erofs-utils`.
 
 | Parameter | Value | Description |
 | :--- | :--- | :--- |
-| **Pcluster Size** (`-C`) | `4096` (4KB) | Matches system page size to ensure zero read amplification and minimal CPU overhead. |
-| **Compression**  | `lz4hc` or `zstd` | LZ4HC is preferred for speed; Zstd requires modern kernels (6.10+). |
-| **UID/GID Mapping** | `0` (root) | All files are forced to 'root' (UID 0, GID 0) for OCI consistency. |
-| **Inline Data** | `Enabled` | Regular files are inlined by default to save disk seeks for small data. |
-| **Reproducibility** | `Enabled` | Modification times are ignored (`--ignore-mtime`) to ensure deterministic builds. |
-| **XATTR Support** | `Disabled` | Extended attributes are disabled for software extractor compatibility. |
+| Block size (`-b`) | `4096` | 4 KiB, matches typical page size. |
+| Pcluster size (`-C`) | `4096` | Single-page pcluster. Zero read amplification. |
+| Compressor (`-z`) | `lz4hc`, `zstd`, or omitted | Determined by media type. `lz4hc` gives better ratio than `lz4` with identical decode cost. |
+| UID / GID | `0` / `0` | All entries owned by root. |
+| Inline data | enabled | Small regular files inlined to save seeks. |
+| Reproducibility | `--ignore-mtime` | Deterministic builds. |
+| Extended attributes | disabled | Userspace extractors do not support xattrs yet. |
+| Tail packing | disabled | Not yet supported by readers. |
+| Dedup / fragments | disabled | Not yet supported by readers. |
 
-## 3. Kernel Configuration Requirements
-To support this specification, the following Linux kernel configuration symbols must be enabled in the target system's `config`:
+Minimum `erofs-utils` version: **1.8.10**.
 
-### Core Filesystem Support
-* **`CONFIG_EROFS_FS=y`**: Enables the primary EROFS driver.
-* **`CONFIG_EROFS_FS_ZIP=y`**: Required to support compressed images (LZ4/Zstd).
+## 4. Kernel Configuration Requirements
 
-### Decompression Backends
-* **`CONFIG_LZ4_DECOMPRESS=y`**: Required for `lz4` or `lz4hc` compressed layers.
-* **`CONFIG_ZSTD_DECOMPRESS=y`**: Required for `zstd` compressed layers (available in Linux 6.10+).
+| Symbol | Required for |
+| :--- | :--- |
+| `CONFIG_EROFS_FS=y` | All EROFS layers. |
+| `CONFIG_EROFS_FS_ZIP=y` | Any compressed layer (includes LZ4/LZ4HC decode). |
+| `CONFIG_EROFS_FS_ZIP_ZSTD=y` | `erofs.zstd+dmverity` layers. Linux 6.x. |
+| `CONFIG_DM_VERITY=y` | Verified mount of the appended hash tree. |
 
-## 4. Feature & Compatibility Matrix
-The minimum supported version for this specification is **Linux 4.9 (via backport)**.
+`erofs.nocmpr` layers need only `CONFIG_EROFS_FS` plus `CONFIG_DM_VERITY`.
 
-| Feature / Metric | Linux v4.9 (Backport) | Linux v5.4 (Mainline) | Linux v5.15 (LTS) | Linux v6.12+ |
-| :--- | :--- | :--- | :--- | :--- |
-| **Status** | Unofficial / Legacy | Official Merge | Feature LTS | Modern |
-| **On-Disk Format** | Legacy (v0) | Compact/Extended | Compact/Extended | Compact/Extended |
-| **In-Place Decomp.** | No (Usually) | Yes | Yes | Yes |
-| **Big Pclusters** | No | No | Yes (5.13+) | Yes |
-| **Zstd Support** | No | No | No | Yes (6.10+) |
+## 5. Feature & Compatibility Matrix
 
-## 5. Build Commands (erofs-utils)
+Minimum supported kernel: **Linux 5.4** (mainline EROFS merge). The legacy v0 on-disk format used in pre-5.4 Android backports is out of scope.
 
-### Target: Legacy (Linux 4.9 Backport)
-Uses the legacy on-disk format for compatibility with older Android-style backports.
+| Feature | Linux 5.4 | Linux 5.15 (LTS) | Linux 6.12+ |
+| :--- | :--- | :--- | :--- |
+| Status | Mainline | LTS | Modern |
+| On-disk format | Compact / extended | Compact / extended | Compact / extended |
+| In-place decompression | Yes | Yes | Yes |
+| Big pclusters | No | Yes (5.13+) | Yes |
+| Zstd support | No | No | Yes (6.x) |
+
+## 6. dm-verity Annotations
+
+Every EROFS content-layer descriptor (any compressor variant) MUST carry the following annotations describing the appended hash tree. Values are lowercase hex strings except `offset`, which is a decimal byte count.
+
+| Annotation Key | Required | Description |
+| :--- | :--- | :--- |
+| `org.rdk.package.content.dmverity.roothash` | Yes | Hex-encoded SHA-256 root hash of the verity tree. |
+| `org.rdk.package.content.dmverity.salt` | Yes | Hex-encoded salt fed to every hash block (≤ 256 bytes). |
+| `org.rdk.package.content.dmverity.offset` | Yes | Byte offset of the hash tree inside the layer blob (= size of the EROFS image). |
+
+Verification: mount the first `offset` bytes as the EROFS data device and use the remaining bytes as the verity hash device with the supplied root hash and salt.
+
+## 7. Build Commands (erofs-utils)
+
+Tooling builds an intermediate tarball, then invokes `mkfs.erofs --tar` to produce the image, then appends the dm-verity hash tree, then publishes the layer with the annotations from section 6.
+
+### LZ4 (`erofs.lz4+dmverity`)
+
 ```bash
 mkfs.erofs \
     -b4096 \
     -C4096 \
     --ignore-mtime \
     -E ^dedupe,^all-fragments,inline_data,^legacy-compress,^xattr-name-filter,^ztailpacking \
-    -zlz4 \
+    -zlz4hc \
     --all-root \
-    --tar \
-    output.erofs /source/directory/base.tar
+    --tar=f \
+    output.erofs /source/base.tar
 ```
+
+### Zstd (`erofs.zstd+dmverity`)
+
+```bash
+mkfs.erofs \
+    -b4096 \
+    -C4096 \
+    --ignore-mtime \
+    -E ^dedupe,^all-fragments,inline_data,^legacy-compress,^xattr-name-filter,^ztailpacking \
+    -zzstd \
+    --all-root \
+    --tar=f \
+    output.erofs /source/base.tar
+```
+
+### Uncompressed (`erofs.nocmpr+dmverity`)
+
+```bash
+mkfs.erofs \
+    -b4096 \
+    -C4096 \
+    --ignore-mtime \
+    -E ^dedupe,^all-fragments,inline_data,^legacy-compress,^xattr-name-filter,^ztailpacking \
+    --all-root \
+    --tar=f \
+    output.erofs /source/base.tar
+```
+
+After `mkfs.erofs` completes, append the dm-verity hash tree to `output.erofs` (e.g. via `veritysetup format` with `--hash-offset=$(stat -c%s output.erofs)` against the same file, or an equivalent in-process implementation) and record the resulting root hash, salt and offset as descriptor annotations.

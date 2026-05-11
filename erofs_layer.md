@@ -4,7 +4,7 @@ EROFS (Enhanced Read-Only File System) is the immutable content-layer format use
 
 ## 1. Overview
 
-EROFS uses fixed-sized output compression: variable input fits into fixed physical blocks. Compared to SquashFS this minimises I/O amplification and resident memory at the cost of slightly larger images, which matches the runtime profile of RDK devices.
+EROFS uses fixed-size output compression: variable input fits into fixed physical blocks. Compared to SquashFS this minimises I/O amplification and resident memory at the cost of slightly larger images, which matches the runtime profile of RDK devices.
 
 When dm-verity is appended, the hash tree is written immediately after the EROFS image in the same blob. The root hash, salt and hash-tree offset are carried as OCI descriptor annotations (see section 6).
 
@@ -32,7 +32,7 @@ Parameters below are normative for RALF EROFS layers. Tooling MUST set them when
 | UID / GID | `0` / `0` | All entries owned by root. |
 | Inline data | enabled | Small regular files inlined to save seeks. |
 | Reproducibility | `--ignore-mtime` | Deterministic builds. |
-| Extended attributes | disabled | Userspace extractors do not support xattrs yet. |
+| Extended attributes | filtered (`^xattr-name-filter`) | The normative `mkfs.erofs` examples configure xattr name filtering rather than an explicit global xattr disable. Userspace extractors do not support xattrs yet, and the tar source produced by tooling contains none. |
 | Tail packing | disabled | Not yet supported by readers. |
 | Dedup / fragments | disabled | Not yet supported by readers. |
 
@@ -51,7 +51,7 @@ Minimum `erofs-utils` version: **1.8.10**.
 
 ## 5. Feature & Compatibility Matrix
 
-Minimum supported kernel: **Linux 5.4** (mainline EROFS merge). The legacy v0 on-disk format used in pre-5.4 Android backports is out of scope.
+Minimum supported kernel for RALF: **Linux 5.4**. The legacy v0 on-disk format used in pre-5.4 Android backports is out of scope.
 
 | Feature | Linux 5.4 | Linux 5.15 (LTS) | Linux 6.12+ |
 | :--- | :--- | :--- | :--- |

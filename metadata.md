@@ -1,5 +1,5 @@
 # Package Metadata Specification
-**Version: 1.0.3**
+**Version: 1.1.0**
 
 This specification describes the metadata that is stored in a package file.
 
@@ -75,6 +75,11 @@ This specification describes the metadata that is stored in a package file.
     "urn:rdk:config:storage": {
       "maxLocalStorage": "32M",
       "sharedStorageAppId": "com.sky.myapp2"
+    },
+    "urn:rdk:config:env": {
+      "COBALT_CERT_KEY_NAME": "example_key",
+      "COBALT_MODEL_YEAR": "2025",
+      "COBALT_INTEGRATOR_NAME": "ExampleOperator"
     },
     "urn:rdk:config:network": [
       {
@@ -546,6 +551,7 @@ Configuration object consist package specific configuration and settings.
 | [urn:rdk:config:network](#urn:rdk:config:network)                             | N/A  | N/A     | Optional            |
 | [urn:rdk:config:memory](#urn:rdk:config:memory)                               | N/A  | N/A     | Optional            |
 | [urn:rdk:config:storage](#urn:rdk:config:storage)                             | N/A  | N/A     | Optional            |
+| [urn:rdk:config:env](#urn:rdk:config:env)                                     | N/A  | N/A     | Optional            |
 
 \*) List is extensible
 
@@ -1133,6 +1139,72 @@ _Examples_
     "urn:rdk:config:storage": {
       "maxLocalStorage": "32M",
       "sharedStorageAppId": "com.sky.myapp2"
+    }
+  }
+}
+```
+
+### urn:rdk:config:env
+
+This OPTIONAL object allows defining environment variables that the runtime manager MUST export into the
+application container. This enables operator-specific runtime configurability for the same binary package.
+
+Each key in the object is an environment variable name and each value is the string value to set.
+Variable names MUST match POSIX environment variable naming rules: start with a letter or underscore,
+followed by letters, digits, or underscores (`[A-Za-z_][A-Za-z0-9_]*`).
+
+The runtime manager MUST parse the `urn:rdk:config:env` section and export each name-value pair as an
+individual environment variable in the application container.
+
+> [!NOTE]
+> This is in addition to the existing requirement for the runtime manager to export
+> `APP_CONFIG_OVERRIDES_JSON` (from `urn:rdk:config:overrides` → `application`) and
+> `RUNTIME_CONFIG_OVERRIDES_JSON` (from `urn:rdk:config:overrides` → `runtime`) as full JSON blobs.
+> The `urn:rdk:config:env` section provides a simpler mechanism for flat key-value environment variables.
+
+_Object Schema_
+
+```json
+{
+  "urn:rdk:config:env": {
+    "description": "Environment variables (NAME → value) to inject into the application container.",
+    "type": "object",
+    "patternProperties": {
+      "^[A-Za-z_][A-Za-z0-9_]*$": {
+        "type": "string"
+      }
+    },
+    "additionalProperties": false
+  }
+}
+```
+
+_Examples_
+
+Cobalt operator-specific environment variables:
+
+```json
+{
+  "configuration": {
+    "urn:rdk:config:env": {
+      "COBALT_CERT_KEY_NAME": "operator_cert_key",
+      "COBALT_CERT_KEY_INDEX": "1",
+      "COBALT_MODEL_YEAR": "2025",
+      "COBALT_OPERATOR_NAME": "ExampleOperator",
+      "COBALT_INTEGRATOR_NAME": "ExampleIntegrator"
+    }
+  }
+}
+```
+
+Amazon Prime Video device configuration:
+
+```json
+{
+  "configuration": {
+    "urn:rdk:config:env": {
+      "DTID": "A1BCDE2F3GH4IJ",
+      "NO_OF_PLAYERS": "2"
     }
   }
 }

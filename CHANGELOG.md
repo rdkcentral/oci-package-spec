@@ -5,6 +5,16 @@ All notable changes to the RALF Specification will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-06-01
+
+### Added
+- New `urn:rdk:config:env` configuration section allowing packages to declare
+  environment variables that the runtime manager MUST export into the
+  application container. This enables operator-specific runtime configurability
+  for the same binary package (e.g. Cobalt cert keys, Amazon DTID).
+- JSON Schema validation for `urn:rdk:config:env` using `patternProperties`
+  to enforce POSIX environment variable naming (`[A-Za-z_][A-Za-z0-9_]*`).
+
 ## [1.0.3] - 2026-05-11
 
 ### Changed

@@ -1,5 +1,5 @@
 # RALF (RDK Application Layer Format) Specification
-**Version: 1.0.3**
+**Version: 1.1.0**
 
 This repository contains the **RALF (RDK Application Layer Format) Specification**, which defines a standard for packaging applications, runtimes, and other resources as OCI (Open Container Initiative) artifacts for RDK devices.
 

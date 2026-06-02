@@ -70,6 +70,18 @@
     "configuration": {
       "description": "Package specific configuration.",
       "type": "object",
+      "properties": {
+        "urn:rdk:config:env": {
+          "description": "Environment variables (NAME → value) to inject into the application container.",
+          "type": "object",
+          "patternProperties": {
+            "^[A-Za-z_][A-Za-z0-9_]*$": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
       "additionalProperties": true
     }
   },

@@ -19,7 +19,7 @@
       "description": "The semantic version number of the package, this is strictly checked to ensure it contains numbers separated by periods",
       "type": "string",
       "minLength": 1,
-      "pattern": "^(0|[1-9][0-9]{0,8})([.](0|[1-9][0-9]{0,8})){0,3}$"
+      "pattern": "^(0|[1-9][0-9]{0,8})([.](0|[1-9][0-9]{0,9})){0,3}$"
     },
     "versionName": {
       "description": "Optional version of the package as a user readable string.",

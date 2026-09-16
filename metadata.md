@@ -230,7 +230,7 @@ _Examples_
 
 ## packageType
 
-A `packageType` informs about type of the package and can have one of the following values:
+A `packageType` informs about the type of the package and can have one of the following values:
 
 - `base` - A package that contains a base layer for an application.
 - `runtime` - A package that contains a runtime for an application.
@@ -238,7 +238,7 @@ A `packageType` informs about type of the package and can have one of the follow
   a runnable application.
 - `service` - A package that contains a service, which is an application that runs in the background. Likewise for
   applications, a service may be combined with a runtime to form a runnable service.
-- `resource` - A package that contains resources, eg. certificates, translations, ML model.
+- `resource` - A package that contains resources, e.g. certificates, translations, ML models.
 
 _Examples_
 
@@ -262,6 +262,27 @@ An optional `packageSpecifier` informs about package specifier and can have one 
 
 New types (and combinations) can be introduced.
 
+> [!IMPORTANT]
+> **Precedence over dependencies.** When both an explicit `dependencies` entry that
+> resolves a runtime and a `packageSpecifier` are present, the `dependencies` entry
+> takes precedence. An implementation MUST honor `dependencies` before falling back
+> to the implicit runtime association derived from `packageSpecifier`. The
+> `packageSpecifier` is only used to infer a default runtime dependency when no
+> explicit dependency provides one.
+
+> [!NOTE]
+> **Runtime requirement for applications.** An `application` (or `service`) package
+> that requires a runtime MUST provide at least one of the following so the platform
+> can determine which runtime to use:
+>
+> - a runtime `dependencies` entry, or
+> - a `packageSpecifier`.
+>
+> Self-contained applications (for example, applications bundled with their own
+> runtime) MAY omit both fields. Both `packageSpecifier` and `dependencies`
+> remain OPTIONAL fields; however, for runtime-dependent applications at least one
+> of the two mechanisms above MUST be available.
+
 Optionally the combination of `packageType` and `packageSpecifier` can serve multiple purposes:
 
 - Identifies the type of the package.
@@ -277,7 +298,7 @@ Optionally the combination of `packageType` and `packageSpecifier` can serve mul
 package requires `html` runtime.
 
 - Discovery and filtering based on package type or specifier, eg. only `html` applications.
-- Based on type, specifier combination, it can implicitly assume default dependency eg. `"packageSpecifier": "html` -> `dependencies": { "rdk.browser.wpe": ">=1.1.0" }`
+- Based on type, specifier combination, it can implicitly assume default dependency eg. `"packageSpecifier": "html` -> `dependencies": { "rdk.browser.wpe": ">=1.1.0" }`. This implicit dependency is only applied when no explicit `dependencies` entry already resolves a runtime (see the precedence note above).
 - Routing, not all packages need to be run by Dobby, eg.
 
 ```json
@@ -363,6 +384,12 @@ _Examples_
 Dependencies are specified in a simple object that maps a package name to a version range.
 The version range is a string which has one or more space-separated descriptors.
 Dependencies can also be identified with a tarball or git URL.
+
+> [!IMPORTANT]
+> When a `dependencies` entry resolves a runtime, it takes precedence over any
+> runtime implied by [`packageSpecifier`](#packageSpecifier). Implementations MUST
+> resolve explicit dependencies first and only fall back to the `packageSpecifier`
+> derived default when no explicit runtime dependency is present.
 
 See [semver](https://semver.org/) for more details about specifying version ranges.
 
@@ -542,7 +569,7 @@ Configuration object with package specific configuration and settings.
 
 | Configuration \*)                                                             | Base | Runtime | Application/Service |
 | ----------------------------------------------------------------------------- | ---- | ------- | ------------------- |
-| [urn:rdk:config:overrides](#urn:rdk:config:overrides)                         | N/A  | N/A     | Optional            |
+| [urn:rdk:config:overrides](#urn:rdk:config:overrides)                         | N/A  | Optional | Optional            |
 | [urn:rdk:config:log-levels](#urn:rdk:config:log-levels)                       | N/A  | N/A     | Optional            |
 | [urn:rdk:config:dial](#urn:rdk:config:dial)                                   | N/A  | N/A     | Optional            |
 | [urn:rdk:config:application-lifecycle](#urn:rdk:config:application-lifecycle) | N/A  | N/A     | Optional            |
@@ -552,6 +579,7 @@ Configuration object with package specific configuration and settings.
 | [urn:rdk:config:memory](#urn:rdk:config:memory)                               | N/A  | N/A     | Optional            |
 | [urn:rdk:config:storage](#urn:rdk:config:storage)                             | N/A  | N/A     | Optional            |
 | [urn:rdk:config:env](#urn:rdk:config:env)                                     | N/A  | N/A     | Optional            |
+| [urn:rdk:config:runtime](#urn:rdk:config:runtime)                             | N/A  | Required | N/A                 |
 
 \*) List is extensible
 
@@ -566,9 +594,6 @@ This allows to override default configuration of any of your dependencies eg. de
 - #### Runtime
 
   An undefined JSON blob that allows config values to be used by the runtime package.
-
-- #### Base
-  An undefined JSON blob that allows config values to be used by the base package.
 
 _Object Schema_
 
@@ -585,11 +610,6 @@ _Object Schema_
       },
       "runtime": {
         "description": "An undefined JSON blob that allows to override config values used by the runtime.",
-        "type": "object",
-        "additionalProperties": true
-      },
-      "base": {
-        "description": "An undefined JSON blob that allows to override config values used by the base layer.",
         "type": "object",
         "additionalProperties": true
       }
@@ -953,7 +973,7 @@ _Object Schema_
 ```json
 {
   "urn:rdk:config:window": {
-    "description": "Window details.",
+    "description": "Window configuration for the app.",
     "type": "object",
     "properties": {
       "virtualDisplaySize": { "type": "integer" }
@@ -1100,7 +1120,7 @@ amount of storage for the app or service. Values can be specified with G, M, or 
 - #### Max Local Storage Size
   The maximum size of the local storage associated with the app.
 - #### Shared Storage App Id
-  The App Id of the app that shared its local storage within this app.
+  The App Id of the app that shared its local storage with this app.
 
 _Object Schema_
 
@@ -1198,6 +1218,86 @@ Amazon Prime Video device configuration:
     "urn:rdk:config:env": {
       "DTID": "A1BCDE2F3GH4IJ",
       "NO_OF_PLAYERS": "2"
+    }
+  }
+}
+```
+
+### urn:rdk:config:runtime
+
+This object is REQUIRED for `runtime` packages. It advertises which application
+types the runtime supports so that a config generator (or launcher) can select an
+appropriate runtime for an application when the application does not specify an
+explicit runtime `dependencies` entry.
+
+Rather than overloading [`packageSpecifier`](#packageSpecifier) with multiple values
+(which would introduce ambiguous interpretations of a single field), the runtime
+declares its capabilities here. Each supported application type MAY carry a set of
+parameters that the platform passes on to the runtime for applications of that type.
+
+- #### supportedApplicationTypes
+
+  An array of the application types the runtime can host. Each entry describes a
+  single supported type and its optional runtime parameters.
+
+  - `type` (REQUIRED) - the application type identifier the runtime supports, using
+    the same vocabulary as [`packageSpecifier`](#packageSpecifier) (e.g. `html`,
+    `lightning`, `cobalt`, `flutter`).
+  - `parameters` (OPTIONAL) - an object of key/value parameters associated with this
+    application type that the platform passes on to the runtime.
+
+_Object Schema_
+
+```json
+{
+  "urn:rdk:config:runtime": {
+    "description": "Runtime capability descriptor advertising the application types this runtime supports.",
+    "type": "object",
+    "properties": {
+      "supportedApplicationTypes": {
+        "description": "The application types this runtime can host.",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "description": "Application type identifier this runtime supports.",
+              "type": "string"
+            },
+            "parameters": {
+              "description": "Optional parameters passed to the runtime for this application type.",
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "required": ["type"]
+        }
+      }
+    },
+    "required": ["supportedApplicationTypes"]
+  }
+}
+```
+
+_Examples_
+
+HTML (WPE) runtime advertising the application types it supports:
+
+```json
+{
+  "configuration": {
+    "urn:rdk:config:runtime": {
+      "supportedApplicationTypes": [
+        {
+          "type": "html",
+          "parameters": {
+            "userAgent": "RDK/WPE"
+          }
+        },
+        {
+          "type": "lightning"
+        }
+      ]
     }
   }
 }

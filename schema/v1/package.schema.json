@@ -1,5 +1,5 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/rdkcentral/oci-package-spec/main/schema/v1/package.schema.json",
   "title": "Package Metadata Schema",
   "description": "Schema defines a JSON structure that accurately represents the package metadata for use with OCI Packaging Format.",
@@ -80,6 +80,32 @@
             }
           },
           "additionalProperties": false
+        },
+        "urn:rdk:config:runtime": {
+          "description": "Runtime capability descriptor advertising the application types this runtime supports. REQUIRED for runtime packages.",
+          "type": "object",
+          "properties": {
+            "supportedApplicationTypes": {
+              "description": "The application types this runtime can host.",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "description": "Application type identifier this runtime supports.",
+                    "type": "string"
+                  },
+                  "parameters": {
+                    "description": "Optional parameters passed to the runtime for this application type.",
+                    "type": "object",
+                    "additionalProperties": true
+                  }
+                },
+                "required": ["type"]
+              }
+            }
+          },
+          "required": ["supportedApplicationTypes"]
         }
       },
       "additionalProperties": true

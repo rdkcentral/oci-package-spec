@@ -8,12 +8,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.1.0] - 2026-06-01
 
 ### Added
+- New `urn:rdk:config:runtime` configuration section (REQUIRED for `runtime`
+  packages) advertising the application types a runtime supports via
+  `supportedApplicationTypes`, with optional per-type `parameters`. This lets a
+  config generator select a runtime for an application when no explicit runtime
+  `dependencies` entry is present, without overloading `packageSpecifier` with
+  multiple ambiguous values.
 - New `urn:rdk:config:env` configuration section allowing packages to declare
   environment variables that the runtime manager MUST export into the
   application container. This enables operator-specific runtime configurability
   for the same binary package (e.g. Cobalt cert keys, Amazon DTID).
 - JSON Schema validation for `urn:rdk:config:env` using `patternProperties`
   to enforce POSIX environment variable naming (`[A-Za-z_][A-Za-z0-9_]*`).
+
+### Changed
+- Clarified runtime resolution precedence: when both a `dependencies` entry that
+  resolves a runtime and a `packageSpecifier` are present, `dependencies` takes
+  precedence and implementations MUST resolve explicit dependencies before
+  falling back to the `packageSpecifier`-derived default.
+- Clarified that a runtime-dependent `application`/`service` package MUST provide
+  at least one of: a runtime `dependencies` entry, a `packageSpecifier`, or a
+  runtime dependency exposing `urn:rdk:config:runtime`. Self-contained
+  applications MAY omit all of these. `packageSpecifier` and `dependencies`
+  remain OPTIONAL fields.
+- `urn:rdk:config:overrides` now applies to `application` and `runtime` only. The
+  `base` scope was removed and the availability table was corrected from
+  `N/A | N/A | Optional` to `N/A | Optional | Optional`.
 
 ## [1.0.3] - 2026-05-11
 

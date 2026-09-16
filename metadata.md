@@ -21,7 +21,7 @@ This specification describes the metadata that is stored in a package file.
   },
   "permissions": [
     "urn:rdk:permission:home-app",
-    "urn:rdk:permission.internet",
+    "urn:rdk:permission:internet",
     "urn:rdk:permission:firebolt",
     "urn:rdk:permission:thunder",
     "urn:rdk:permission:rialto",
@@ -130,7 +130,7 @@ The `id` MUST comply with the following rules:
 
 - Cannot be an empty string.
 - May only contain dots (`.`), dashes (`-`), underscore (`_`) and alphanumeric characters (a-z, A-Z, 0-9).
-- In additional the following restrictions apply:
+- In addition the following restrictions apply:
   - The first and last characters must be alphanumeric.
   - Double dots (`..`) are not allowed anywhere in the string.
 
@@ -242,7 +242,7 @@ A `packageType` informs about type of the package and can have one of the follow
 
 _Examples_
 
-Package consist application:
+Package consisting of an application:
 
 ```json
 {
@@ -255,10 +255,10 @@ Package consist application:
 An optional `packageSpecifier` informs about package specifier and can have one of the following values:
 
 - `html` - A package that is (or depends) on html (wpe) runtime.
-- `lightnig` - A package that is (or depends) on lightning (wpe) runtime.
+- `lightning` - A package that is (or depends) on lightning (wpe) runtime.
 - `cobalt` - A package that is (or depends) on cobalt runtime.
 - `flutter` - A package that is (or depends) on flutter runtime.
-- `system` - A package that should be executed bcontains an application. An application is optionally combined with a runtime to form
+- `system` - A package that should be executed by the system directly (e.g. via systemd).
 
 New types (and combinations) can be introduced.
 
@@ -276,9 +276,9 @@ Optionally the combination of `packageType` and `packageSpecifier` can serve mul
 
 package requires `html` runtime.
 
-- Disovery and filtering based on package type or specifier, eg. only `html` applications.
+- Discovery and filtering based on package type or specifier, eg. only `html` applications.
 - Based on type, specifier combination, it can implicitly assume default dependency eg. `"packageSpecifier": "html` -> `dependencies": { "rdk.browser.wpe": ">=1.1.0" }`
-- Routing, not all packages needs to by run by Dobby, eg.
+- Routing, not all packages need to be run by Dobby, eg.
 
 ```json
 {
@@ -289,16 +289,16 @@ package requires `html` runtime.
 
 _Examples_
 
-Package consist HTML Runtime (WPE):
+Package consisting of an HTML Runtime (WPE):
 
 ```json
 {
-  "pacakgeType": "runtime",
+  "packageType": "runtime",
   "packageSpecifier": "html"
 }
 ```
 
-Package consist application that relies on HTML Runtime:
+Package consisting of an application that relies on HTML Runtime:
 
 ```json
 {
@@ -416,7 +416,7 @@ This feature is helpful for local offline development and creating tests that re
 
 ## permissions
 
-These array represents permissions that an `application` or `service` package is requesting. Runtime
+This array represents permissions that an `application` or `service` package is requesting. Runtime
 packages do not request permissions, but the apps or services that run within the runtime may request them.
 
 | Permission \*)                                                                            |
@@ -492,14 +492,14 @@ The app or service requesting access to the time shift buffer.
 _Read External Storage Permission_
 
 The app or service is requesting access to be able to read data from attached external storage devices.
-Those are typicallyl USB memory sticks.
+Those are typically USB memory sticks.
 
 - ### urn:rdk:permission:external-storage::write
 
 _Write External Storage Permission_
 
 The app or service is requesting access to be able to read and write data from attached external storage devices.
-Those are typicallyl USB memory sticks.
+Those are typically USB memory sticks.
 
 - ### urn:rdk:permission:display-overlay
 
@@ -522,7 +522,7 @@ _Examples_
 {
   "permissions": [
     "urn:rdk:permission:home-app",
-    "urn:rdk:permission.internet",
+    "urn:rdk:permission:internet",
     "urn:rdk:permission:firebolt",
     "urn:rdk:permission:thunder",
     "urn:rdk:permission:rialto",
@@ -538,7 +538,7 @@ _Examples_
 
 ## configuration
 
-Configuration object consist package specific configuration and settings.
+Configuration object with package specific configuration and settings.
 
 | Configuration \*)                                                             | Base | Runtime | Application/Service |
 | ----------------------------------------------------------------------------- | ---- | ------- | ------------------- |
@@ -557,7 +557,7 @@ Configuration object consist package specific configuration and settings.
 
 ### urn:rdk:config:overrides
 
-This allows to override defualt configuration of any of your dependencies eg. default web runtime user-agent.
+This allows to override default configuration of any of your dependencies eg. default web runtime user-agent.
 
 - #### Application
 
@@ -575,25 +575,21 @@ _Object Schema_
 ```json
 {
   "urn:rdk:config:overrides": {
-    "description": "Window details.",
+    "description": "Configuration overrides for dependencies.",
     "type": "object",
     "properties": {
       "application": {
-        "description": "An undefined JSON Blog that allows to override config values used by the application.",
+        "description": "An undefined JSON blob that allows to override config values used by the application.",
         "type": "object",
         "additionalProperties": true
-      }
-    },
-    "properties": {
+      },
       "runtime": {
-        "description": "An undefined JSON Blog that allows to override config values used by the runtime.",
+        "description": "An undefined JSON blob that allows to override config values used by the runtime.",
         "type": "object",
         "additionalProperties": true
-      }
-    },
-    "properties": {
+      },
       "base": {
-        "description": "An undefined JSON Blog that allows to override config values used by the base layer.",
+        "description": "An undefined JSON blob that allows to override config values used by the base layer.",
         "type": "object",
         "additionalProperties": true
       }
@@ -732,9 +728,9 @@ Set of the lifecycle related configs for the app or service.
   - `["paused"]`
   - `["paused","suspended"]`
   - `["paused","suspended","hibernated"]`
-- #### Maxiumum Suspended System Memory
+- #### Maximum Suspended System Memory
   The maximum system memory allowed for the app when suspended.
-- #### Maximum Time To Suspendd Memory State
+- #### Maximum Time To Suspended Memory State
   The maximum time to reduce the system memory usage to its `MaxSuspendedSystemMemory` after entering suspended state.
 - #### Startup Timeout
   The time in seconds that the system will wait for the app or service to signal it has started before terminating it.
@@ -761,9 +757,9 @@ _Object Schema_
         "type": "string",
         "pattern": "^\\d+[GMB]?$"
       },
-      "maxTimeToSuspendMemoryState": { "type": "integer" },
+      "maxTimeToSuspendMemoryState": { "type": "string" },
       "startupTimeout": { "type": "integer" },
-      "watchdogInteval": { "type": "integer" }
+      "watchdogInterval": { "type": "integer" }
     },
     "required": [
       "supportedNonActiveStates",
@@ -794,7 +790,7 @@ _Examples_
 ### urn:rdk:config:platform
 
 This OPTIONAL object specifies the platform on which the package is intended to run.
-This object is complaint with corresponding object in [OCI Index](https://github.com/opencontainers/image-spec/blob/main/image-index.md#image-index-property-descriptions) and [OCI Image Config](https://github.com/opencontainers/image-spec/blob/main/config.md#properties).
+This object is compliant with corresponding object in [OCI Index](https://github.com/opencontainers/image-spec/blob/main/image-index.md#image-index-property-descriptions) and [OCI Image Config](https://github.com/opencontainers/image-spec/blob/main/config.md#properties).
 
 In RDK environment the values that will be used:
 
@@ -935,7 +931,7 @@ _Examples_
 {
   "configuration": {
     "urn:rdk:config:input-handling": {
-      "keyCapture": ["search", "voice"],
+      "keyIntercept": ["search", "voice"],
       "keyCapture": ["search", "voice"],
       "keyMonitor": ["volume+", "volume-"]
     }
@@ -960,7 +956,7 @@ _Object Schema_
     "description": "Window details.",
     "type": "object",
     "properties": {
-      "virtualDisplaySize": { "type": "string" }
+      "virtualDisplaySize": { "type": "integer" }
     }
   }
 }
@@ -980,7 +976,7 @@ _Examples_
 
 ### urn:rdk:config:network
 
-And app or service can request access to or expose a network services. Network services are divided into three
+An app or service can request access to or expose network services. Network services are divided into three
 categories:
 
 - #### public
@@ -1006,19 +1002,16 @@ _Object Schema_
 {
   "urn:rdk:config:network": {
     "description": "Network services configuration.",
-    "type": "object",
-    "properties": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "name": { "type": "string" },
-          "port": { "type": "integer" },
-          "protocol": { "type": "string" },
-          "type": { "type": "string" }
-        },
-        "required": ["name", "port", "protocol", "type"]
-      }
+    "type": "array",
+    "items": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "port": { "type": "integer" },
+        "protocol": { "type": "string" },
+        "type": { "type": "string" }
+      },
+      "required": ["name", "port", "protocol", "type"]
     }
   }
 }
@@ -1101,8 +1094,8 @@ _Examples_
 
 ### urn:rdk:config:storage
 
-The requested storage quota for the app or service (in MB). This is optional and used as a hint to the system about the
-amount of storage for the app or service.
+The requested storage quota for the app or service. This is optional and used as a hint to the system about the
+amount of storage for the app or service. Values can be specified with G, M, or B suffix.
 
 - #### Max Local Storage Size
   The maximum size of the local storage associated with the app.

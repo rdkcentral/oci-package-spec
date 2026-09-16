@@ -76,9 +76,9 @@ Each layer is associated with its own Media Type, which is stored in the OCI Des
 | -------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Package OCI Artifact | JSON Object              | application/vnd.rdk.package.config.v1+json                                                                                                                                                                                   | Custom package metadata - [package.json](metadata.json)                                                                                                                                                                                                                       |
 |                      | JSON Object                     | application/vnd.oci.empty.v1+json                                                                                                                                                                                            | _Application_<br><br> Is for packages that consist only out of metadata (eg. web apps) - config layer and hence have no real content layer - payload data. As defined by the OCI Image Specification, the corresponding content layer then consists solely of an empty JSON object, being {}                           |
-|                      | binary data (byte array) | application/vnd.rdk.package.content.layer.v1.tar<br>application/vnd.rdk.package.content.layer.v1.tar+gzip<br>application/vnd.rdk.package.content.layer.v1.zip<br>application/vnd.rdk.package.content.layer.v1.erofs.lz4+dmverity<br>application/vnd.rdk.package.content.layer.v1.erofs.zstd+dmverity<br>application/vnd.rdk.package.content.layer.v1.erofs.nocmpr+dmverity<br>application/vnd.rdk.package.content.layer.v1.erofs+dmverity _(deprecated; accept as erofs.lz4+dmverity)_ | _Runtime_<br><br>Consist specific binaries, resources, configurations and shared libraries that build up final runtime, eg.<br><br>- rdkbrowser<br>- cobalt<br>- flutter<br>- luna<br><br>_Application_<br><br>Contains application binary, resources, shared libraries, etc. |
+|                      | binary data (byte array) | application/vnd.rdk.package.content.layer.v1.tar<br>application/vnd.rdk.package.content.layer.v1.tar+gzip<br>application/vnd.rdk.package.content.layer.v1.zip<br>application/vnd.rdk.package.content.layer.v1.erofs.lz4+dmverity<br>application/vnd.rdk.package.content.layer.v1.erofs.zstd+dmverity<br>application/vnd.rdk.package.content.layer.v1.erofs.nocmpr+dmverity<br>application/vnd.rdk.package.content.layer.v1.erofs+dmverity _(deprecated; accept as erofs.lz4+dmverity)_ | _Runtime_<br><br>Consists of specific binaries, resources, configurations and shared libraries that build up final runtime, eg.<br><br>- rdkbrowser<br>- cobalt<br>- flutter<br>- luna<br><br>_Application_<br><br>Contains application binary, resources, shared libraries, etc. |
 
-OCI Artifact Manifest also consist artifactType always set to:
+OCI Artifact Manifest also contains an artifactType always set to:
 
 `application/vnd.rdk.package+type`
 
@@ -123,20 +123,21 @@ Browser Test Tool example application package metadata.
 ```json
 {
   "id": "com.sky.browser_test_tool",
+  "specVersion": "1.1.0",
   "version": "4.3.5",
   "name": "Browser Test Tool",
   "packageType": "application",
   "packageSpecifier": "html",
   "entryPoint": ".",
   "dependencies": {
-    "com.sky.rdkbrowser": ">=2.7.2-kirkstone"
+    "com.sky.rdkbrowser": ">=2.7.2"
   },
   "permissions": [
-    "urn:rdk:permission.internet",
+    "urn:rdk:permission:internet",
     "urn:rdk:permission:firebolt",
     "urn:rdk:permission:thunder",
-    "urn:entos:permissionr:as-access",
-    "urn:entos:permissior:as-player"
+    "urn:entos:permission:as-access",
+    "urn:entos:permission:as-player"
   ],
   "configuration": {
     "urn:rdk:config:platform": {
@@ -207,16 +208,17 @@ Web application with no package data example application package metadata.
 ```json
 {
   "id": "com.rdkcentral.wiki",
+  "specVersion": "1.1.0",
   "version": "0.1.0",
   "name": "RDK Central Wiki",
   "packageType": "application",
   "packageSpecifier": "html",
   "entryPoint": "https://wiki.rdkcentral.com/",
   "dependencies": {
-    "com.sky.rdkbrowser": ">=2.7.2-kirkstone"
+    "com.sky.rdkbrowser": ">=2.7.2"
   },
   "permissions": [
-    "urn:rdk:permission.internet",
+    "urn:rdk:permission:internet",
     "urn:rdk:permission:firebolt"
   ],
   "configuration": {
@@ -275,7 +277,8 @@ Browser example runtime package metadata.
 ```json
 {
   "id": "com.sky.rdkbrowser",
-  "version": "2.7.2-kirkstone",
+  "specVersion": "1.1.0",
+  "version": "2.7.2",
   "name": "com.sky.rdkbrowser",
   "packageType": "runtime",
   "packageSpecifier": "html",
@@ -370,7 +373,7 @@ The content of the signature layer (the blob) is a JSON object with the followin
 
 `docker-reference` is a string that identifies the signed artifact. It does not
 have to follow any specific format, but it is recommended to use a format that clearly indicates the artifact being
-signed (e.g., `com.sky.rdkbrowser:2.7.2-kirkstone`).
+signed (e.g., `com.sky.rdkbrowser:2.7.2`).
 
 ### Key Generation (Informative)
 
@@ -462,7 +465,7 @@ The index links the target package and its signature.
 {
   "critical": {
     "identity": {
-      "docker-reference": "com.sky.rdkbrowser:2.7.2-kirkstone"
+      "docker-reference": "com.sky.rdkbrowser:2.7.2"
     },
     "image": {
       "docker-manifest-digest": "sha256:4161227e2a40097d5e00150b6027e86ea78a03f3668d41cf240173dc9b199614"

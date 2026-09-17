@@ -1,0 +1,30 @@
+{
+  "id": "com.example.browser",
+  "specVersion": "1.1.0",
+  "version": "2.7.2",
+  "name": "Example Browser Runtime",
+  "packageType": "runtime",
+  "packageSpecifier": "html",
+  "entryPoint": "BrowserLauncher",
+  "dependencies": {
+    "com.rdk.base.system": ">=1.0.0"
+  },
+  "configuration": {
+    "urn:rdk:config:runtime": {
+      "supportedApplicationTypes": [
+        {
+          "type": "html",
+          "args": {
+            "userAgent": "RDK/WPE"
+          }
+        },
+        {
+          "type": "lightning",
+          "args": {
+            "userAgent": "RDK/Lightning"
+          }
+        }
+      ]
+    }
+  }
+}

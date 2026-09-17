@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'schema/**'
+      - 'test/**'
       - '*.md'
       - '.github/workflows/**'
   push:
@@ -24,3 +25,6 @@ jobs:
 
       - name: Compile schema with ajv
         run: npx --yes ajv-cli@5 compile -s schema/v1/package.schema.json --spec=draft2020
+
+      - name: Validate test fixtures
+        run: npx --yes ajv-cli@5 validate -s schema/v1/package.schema.json -d "test/fixtures/valid-*.json" --spec=draft2020

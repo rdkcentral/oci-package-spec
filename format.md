@@ -285,6 +285,18 @@ Browser example runtime package metadata.
   "entryPoint": "SkyBrowserLauncher",
   "dependencies": {
     "com.rdk.base.system": ">=1.1.0"
+  },
+  "configuration": {
+    "urn:rdk:config:runtime": {
+      "supportedApplicationTypes": [
+        {
+          "type": "html",
+          "args": {
+            "userAgent": "RDK/WPE"
+          }
+        }
+      ]
+    }
   }
 }
 ```

@@ -1,0 +1,7 @@
+{
+  "id": "com.example.doom-wad",
+  "specVersion": "1.1.0",
+  "version": "1.0.0",
+  "name": "Doom WAD Resource",
+  "packageType": "resource"
+}

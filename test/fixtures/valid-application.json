@@ -1,0 +1,53 @@
+{
+  "id": "com.example.testapp",
+  "specVersion": "1.1.0",
+  "version": "1.0.0",
+  "versionName": "1.0.0-beta",
+  "name": "Test Application",
+  "packageType": "application",
+  "packageSpecifier": "html",
+  "entryPoint": "web/index.html",
+  "entryArgs": ["--debug=true"],
+  "dependencies": {
+    "rdk.browser.wpe": ">=1.1.0"
+  },
+  "permissions": [
+    "urn:rdk:permission:internet",
+    "urn:rdk:permission:firebolt",
+    "urn:rdk:permission:rialto"
+  ],
+  "configuration": {
+    "urn:rdk:config:overrides": {
+      "application": {
+        "colorTheme": "vivid"
+      },
+      "runtime": {
+        "userAgent": "TestApp/1.0"
+      }
+    },
+    "urn:rdk:config:env": {
+      "APP_MODE": "production",
+      "FEATURE_FLAGS": "enable_hdr,enable_atmos"
+    },
+    "urn:rdk:config:platform": {
+      "architecture": "arm",
+      "variant": "v7",
+      "os": "linux"
+    },
+    "urn:rdk:config:memory": {
+      "system": "256M",
+      "gpu": "128M"
+    },
+    "urn:rdk:config:storage": {
+      "maxLocalStorage": "32M"
+    },
+    "urn:rdk:config:network": [
+      {
+        "name": "com.example.testapp.api",
+        "port": 8080,
+        "protocol": "tcp",
+        "type": "exported"
+      }
+    ]
+  }
+}

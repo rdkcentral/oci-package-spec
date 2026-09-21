@@ -8,7 +8,7 @@ This specification describes the metadata that is stored in a package file.
 ```json
 {
   "id": "com.sky.myapp",
-  "specVersion": "1.0.0",
+  "specVersion": "1.1.0",
   "version": "1.2.3",
   "versionName": "1.2.3-beta",
   "name": "My Application",
@@ -52,7 +52,7 @@ This specification describes the metadata that is stored in a package file.
     "urn:rdk:config:application-lifecycle": {
       "supportedNonActiveStates": ["paused", "suspended", "hibernated"],
       "maxSuspendedSystemMemory": "16M",
-      "maxTimeToSuspendMemoryState": "10",
+      "maxTimeToSuspendMemoryState": 10,
       "startupTimeout": 60,
       "watchdogInterval": 30
     },
@@ -107,20 +107,20 @@ This specification describes the metadata that is stored in a package file.
 
 ## Metadata Available per Package Type
 
-| Metadata                              | Base     | Runtime  | Application/Service |
-| ------------------------------------- | -------- | -------- | ------------------- |
-| [id](#id)                             | Required | Required | Required            |
-| [specVersion](#specVersion)           | Required | Required | Required            |
-| [version](#version)                   | Required | Required | Required            |
-| [versionName](#versionName)           | Optional | Optional | Optional            |
-| [name](#name)                         | Optional | Optional | Optional            |
-| [packageType](#packageType)           | Required | Required | Required            |
-| [packageSpecifier](#packageSpecifier) | Optional | Optional | Optional            |
-| [entryPoint](#entryPoint)             | Required | Required | Required            |
-| [entryArgs](#entryArgs)               | Optional | Optional | Optional            |
-| [dependencies](#dependencies)         | N/A      | Optional | Optional            |
-| [permissions](#permissions)           | N/A      | Optional | Optional            |
-| [configuration](#configuration)       | N/A      | Optional | Optional            |
+| Metadata                              | Base     | Runtime  | Application/Service | Resource |
+| ------------------------------------- | -------- | -------- | ------------------- | -------- |
+| [id](#id)                             | Required | Required | Required            | Required |
+| [specVersion](#specVersion)           | Required | Required | Required            | Required |
+| [version](#version)                   | Required | Required | Required            | Required |
+| [versionName](#versionName)           | Optional | Optional | Optional            | Optional |
+| [name](#name)                         | Optional | Optional | Optional            | Optional |
+| [packageType](#packageType)           | Required | Required | Required            | Required |
+| [packageSpecifier](#packageSpecifier) | Optional | Optional | Optional            | N/A      |
+| [entryPoint](#entryPoint)             | Required | Required | Required            | Optional |
+| [entryArgs](#entryArgs)               | Optional | Optional | Optional            | Optional |
+| [dependencies](#dependencies)         | N/A      | Optional | Optional            | N/A      |
+| [permissions](#permissions)           | N/A      | Optional | Optional            | N/A      |
+| [configuration](#configuration)       | N/A      | Optional | Optional            | N/A      |
 
 ## id
 
@@ -230,7 +230,7 @@ _Examples_
 
 ## packageType
 
-A `packageType` informs about type of the package and can have one of the following values:
+A `packageType` informs about the type of the package and can have one of the following values:
 
 - `base` - A package that contains a base layer for an application.
 - `runtime` - A package that contains a runtime for an application.
@@ -238,7 +238,7 @@ A `packageType` informs about type of the package and can have one of the follow
   a runnable application.
 - `service` - A package that contains a service, which is an application that runs in the background. Likewise for
   applications, a service may be combined with a runtime to form a runnable service.
-- `resource` - A package that contains resources, eg. certificates, translations, ML model.
+- `resource` - A package that contains resources, e.g. certificates, translations, ML models.
 
 _Examples_
 
@@ -262,6 +262,27 @@ An optional `packageSpecifier` informs about package specifier and can have one 
 
 New types (and combinations) can be introduced.
 
+> [!IMPORTANT]
+> **Precedence over dependencies.** When both an explicit `dependencies` entry that
+> resolves a runtime and a `packageSpecifier` are present, the `dependencies` entry
+> takes precedence. An implementation MUST honor `dependencies` before falling back
+> to the implicit runtime association derived from `packageSpecifier`. The
+> `packageSpecifier` is only used to infer a default runtime dependency when no
+> explicit dependency provides one.
+
+> [!NOTE]
+> **Runtime requirement for applications.** An `application` (or `service`) package
+> that requires a runtime MUST provide at least one of the following so the platform
+> can determine which runtime to use:
+>
+> - a runtime `dependencies` entry, or
+> - a `packageSpecifier`.
+>
+> Self-contained applications (for example, applications bundled with their own
+> runtime) MAY omit both fields. Both `packageSpecifier` and `dependencies`
+> remain OPTIONAL fields; however, for runtime-dependent applications at least one
+> of the two mechanisms above MUST be available.
+
 Optionally the combination of `packageType` and `packageSpecifier` can serve multiple purposes:
 
 - Identifies the type of the package.
@@ -277,13 +298,13 @@ Optionally the combination of `packageType` and `packageSpecifier` can serve mul
 package requires `html` runtime.
 
 - Discovery and filtering based on package type or specifier, eg. only `html` applications.
-- Based on type, specifier combination, it can implicitly assume default dependency eg. `"packageSpecifier": "html` -> `dependencies": { "rdk.browser.wpe": ">=1.1.0" }`
+- Based on type, specifier combination, it can implicitly assume default dependency eg. `"packageSpecifier": "html"` -> `"dependencies": { "rdk.browser.wpe": ">=1.1.0" }`. This implicit dependency is only applied when no explicit `dependencies` entry already resolves a runtime (see the precedence note above).
 - Routing, not all packages need to be run by Dobby, eg.
 
 ```json
 {
   "packageType": "service",
-  "packageSpecifier": "systemd"
+  "packageSpecifier": "system"
 }
 ```
 
@@ -313,6 +334,9 @@ Every package has an entry point, this is a string and expected to be a path to 
 interpretation of this path is up to the system / runtime that is using the package. Typically, for runtime packages
 this will be the path to the `init` executable or script to run in a container. For `application` and `service` packages
 this path may be passed to the runtime `init` to start the app or service.
+
+`entryPoint` is REQUIRED for all package types except `resource`, where it is OPTIONAL (a resource package is plain
+content, e.g. `doom.wad` or a sqlite database, and may not have a meaningful entry point).
 
 The entry point path is relative to the root of the package.
 
@@ -363,6 +387,12 @@ _Examples_
 Dependencies are specified in a simple object that maps a package name to a version range.
 The version range is a string which has one or more space-separated descriptors.
 Dependencies can also be identified with a tarball or git URL.
+
+> [!IMPORTANT]
+> When a `dependencies` entry resolves a runtime, it takes precedence over any
+> runtime implied by [`packageSpecifier`](#packageSpecifier). Implementations MUST
+> resolve explicit dependencies first and only fall back to the `packageSpecifier`
+> derived default when no explicit runtime dependency is present.
 
 See [semver](https://semver.org/) for more details about specifying version ranges.
 
@@ -542,7 +572,7 @@ Configuration object with package specific configuration and settings.
 
 | Configuration \*)                                                             | Base | Runtime | Application/Service |
 | ----------------------------------------------------------------------------- | ---- | ------- | ------------------- |
-| [urn:rdk:config:overrides](#urn:rdk:config:overrides)                         | N/A  | N/A     | Optional            |
+| [urn:rdk:config:overrides](#urn:rdk:config:overrides)                         | N/A  | Optional | Optional            |
 | [urn:rdk:config:log-levels](#urn:rdk:config:log-levels)                       | N/A  | N/A     | Optional            |
 | [urn:rdk:config:dial](#urn:rdk:config:dial)                                   | N/A  | N/A     | Optional            |
 | [urn:rdk:config:application-lifecycle](#urn:rdk:config:application-lifecycle) | N/A  | N/A     | Optional            |
@@ -552,6 +582,7 @@ Configuration object with package specific configuration and settings.
 | [urn:rdk:config:memory](#urn:rdk:config:memory)                               | N/A  | N/A     | Optional            |
 | [urn:rdk:config:storage](#urn:rdk:config:storage)                             | N/A  | N/A     | Optional            |
 | [urn:rdk:config:env](#urn:rdk:config:env)                                     | N/A  | N/A     | Optional            |
+| [urn:rdk:config:runtime](#urn:rdk:config:runtime)                             | N/A  | Required | N/A                 |
 
 \*) List is extensible
 
@@ -566,9 +597,6 @@ This allows to override default configuration of any of your dependencies eg. de
 - #### Runtime
 
   An undefined JSON blob that allows config values to be used by the runtime package.
-
-- #### Base
-  An undefined JSON blob that allows config values to be used by the base package.
 
 _Object Schema_
 
@@ -587,13 +615,9 @@ _Object Schema_
         "description": "An undefined JSON blob that allows to override config values used by the runtime.",
         "type": "object",
         "additionalProperties": true
-      },
-      "base": {
-        "description": "An undefined JSON blob that allows to override config values used by the base layer.",
-        "type": "object",
-        "additionalProperties": true
       }
-    }
+    },
+    "additionalProperties": false
   }
 }
 ```
@@ -755,9 +779,9 @@ _Object Schema_
       },
       "maxSuspendedSystemMemory": {
         "type": "string",
-        "pattern": "^\\d+[GMB]?$"
+        "pattern": "^\\d+[GMBgmb]?$"
       },
-      "maxTimeToSuspendMemoryState": { "type": "string" },
+      "maxTimeToSuspendMemoryState": { "type": "integer" },
       "startupTimeout": { "type": "integer" },
       "watchdogInterval": { "type": "integer" }
     },
@@ -779,7 +803,7 @@ _Examples_
     "urn:rdk:config:application-lifecycle": {
       "supportedNonActiveStates": ["paused", "suspended", "hibernated"],
       "maxSuspendedSystemMemory": "16M",
-      "maxTimeToSuspendMemoryState": "10",
+      "maxTimeToSuspendMemoryState": 10,
       "startupTimeout": 60,
       "watchdogInterval": 30
     }
@@ -953,7 +977,7 @@ _Object Schema_
 ```json
 {
   "urn:rdk:config:window": {
-    "description": "Window details.",
+    "description": "Window configuration for the app.",
     "type": "object",
     "properties": {
       "virtualDisplaySize": { "type": "integer" }
@@ -1062,16 +1086,16 @@ _Object Schema_
 ```json
 {
   "urn:rdk:config:memory": {
-    "description": "Memory quota. Value can be specified with G, M, or B suffix. If no suffix is provided, the value is assumed to be in bytes.",
+    "description": "Memory quota. Value can be specified with a G, M, or B suffix (case-insensitive). If no suffix is provided, the value is assumed to be in bytes.",
     "type": "object",
     "properties": {
       "system": {
         "type": "string",
-        "pattern": "^\\d+[GMB]?$"
+        "pattern": "^\\d+[GMBgmb]?$"
       },
       "gpu": {
         "type": "string",
-        "pattern": "^\\d+[GMB]?$"
+        "pattern": "^\\d+[GMBgmb]?$"
       }
     },
     "required": ["system", "gpu"]
@@ -1095,24 +1119,24 @@ _Examples_
 ### urn:rdk:config:storage
 
 The requested storage quota for the app or service. This is optional and used as a hint to the system about the
-amount of storage for the app or service. Values can be specified with G, M, or B suffix.
+amount of storage for the app or service. Values can be specified with a G, M, or B suffix (case-insensitive).
 
 - #### Max Local Storage Size
   The maximum size of the local storage associated with the app.
 - #### Shared Storage App Id
-  The App Id of the app that shared its local storage within this app.
+  The App Id of the app that shared its local storage with this app.
 
 _Object Schema_
 
 ```json
 {
   "urn:rdk:config:storage": {
-    "description": "Storage quota. Value can be specified with G, M, or B suffix. If no suffix is provided, the value is assumed to be in bytes.",
+    "description": "Storage quota. Value can be specified with a G, M, or B suffix (case-insensitive). If no suffix is provided, the value is assumed to be in bytes.",
     "type": "object",
     "properties": {
       "maxLocalStorage": {
         "type": "string",
-        "pattern": "^\\d+[GMB]?$"
+        "pattern": "^\\d+[GMBgmb]?$"
       },
       "sharedStorageAppId": {
         "type": "string",
@@ -1198,6 +1222,90 @@ Amazon Prime Video device configuration:
     "urn:rdk:config:env": {
       "DTID": "A1BCDE2F3GH4IJ",
       "NO_OF_PLAYERS": "2"
+    }
+  }
+}
+```
+
+### urn:rdk:config:runtime
+
+This object is REQUIRED for `runtime` packages. It advertises which application
+types the runtime supports so that a config generator (or launcher) can select an
+appropriate runtime for an application when the application does not specify an
+explicit runtime `dependencies` entry.
+
+Rather than overloading [`packageSpecifier`](#packageSpecifier) with multiple values
+(which would introduce ambiguous interpretations of a single field), the runtime
+declares its capabilities here. Each supported application type MAY carry a set of
+arguments that the platform passes on to the runtime for applications of that type.
+
+- #### supportedApplicationTypes
+
+  An array of the application types the runtime can host. Each entry describes a
+  single supported type and its optional runtime arguments.
+
+  - `type` (REQUIRED) - the application type identifier the runtime supports, using
+    the same vocabulary as [`packageSpecifier`](#packageSpecifier) (e.g. `html`,
+    `lightning`, `cobalt`, `flutter`).
+  - `args` (OPTIONAL) - an object of key/value arguments associated with this
+    application type that the platform passes on to the runtime. Depending on the
+    type, the runtime may expect a specific set of arguments.
+
+_Object Schema_
+
+```json
+{
+  "urn:rdk:config:runtime": {
+    "description": "Runtime capability descriptor advertising the application types this runtime supports.",
+    "type": "object",
+    "properties": {
+      "supportedApplicationTypes": {
+        "description": "The application types this runtime can host.",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "description": "Application type identifier this runtime supports.",
+              "type": "string"
+            },
+            "args": {
+              "description": "Arguments passed to the runtime for this application type.",
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "required": ["type"]
+        }
+      }
+    },
+    "required": ["supportedApplicationTypes"]
+  }
+}
+```
+
+_Examples_
+
+HTML (WPE) runtime advertising the application types it supports:
+
+```json
+{
+  "configuration": {
+    "urn:rdk:config:runtime": {
+      "supportedApplicationTypes": [
+        {
+          "type": "html",
+          "args": {
+            "userAgent": "RDK/WPE"
+          }
+        },
+        {
+          "type": "lightning",
+          "args": {
+            "userAgent": "RDK/Lightning"
+          }
+        }
+      ]
     }
   }
 }

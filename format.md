@@ -524,15 +524,12 @@ Package Structure with dm-crypt+LUKS Encryption: A complete encrypted bolt packa
 
 **3. Signature Manifest (Unencrypted — if cosigned)**
 
-* References the original (unencrypted) plaintext manifest digest
-* Signature validation occurs on the plaintext manifest
+* References the target (unencrypted) manifest digest
+* Signature validation occurs on the target manifest
 
 **4. Encryption Metadata (Content Layer Manifest Annotations — injected by bolt-tool)**
 
 * JWE-wrapped master key (`org.opencontainers.image.enc.keys.jwe`)
-* LUKS cipher spec (`org.opencontainers.image.dmcrypt.cipher`) - Optional informational annotation
-* LUKS salt (`org.opencontainers.image.dmcrypt.salt`) - Optional informational annotation
-* LUKS type and key size - Optional informational annotation
 
 ### LUKS2 Container Structure
 
@@ -540,27 +537,38 @@ Package Structure with dm-crypt+LUKS Encryption: A complete encrypted bolt packa
 
 ```
 Offset 0
-├─────────────────────────────────────────────────────────┤ ← offset 0
-│  PRIMARY BINARY HEADER  (512 bytes, fixed)              │
-├─────────────────────────────────────────────────────────┤ ← offset 512
-│  PRIMARY JSON AREA      (metadata_size − 512 bytes)     │
-├─────────────────────────────────────────────────────────┤ ← offset metadata_size
-│                                                         │
-│  KEYSLOTS AREA          (keyslots_size bytes)           │
-│  (encrypted volume key material, one slot per passphrase│
-│   or key file; up to 32 slots)                          │
-│                                                         │
-├─────────────────────────────────────────────────────────┤ ← offset (metadata_size + keyslots_size)
-│  SECONDARY BINARY HEADER (512 bytes, backup)            │
 ├─────────────────────────────────────────────────────────┤
-│  SECONDARY JSON AREA    (metadata_size − 512 bytes)     │
-├─────────────────────────────────────────────────────────┤ ← offset (2 × metadata_size + keyslots_size)
+│  PRIMARY HEADER  (4 KiB)                                │
+├─────────────────────────────────────────────────────────┤
+│  PRIMARY JSON METADATA AREA                             |
+|           - Keyslots definitions                        |
+|           - segments definitions                        |
+|           - digests                                     |
+|           - tokens                                      |
+|           - config                                      |
+├─────────────────────────────────────────────────────────┤
 │                                                         │
-│  DATA SEGMENT           (rest of device/file)           │  ← encrypted content
-│  (AES-XTS sector-encrypted data)                        │
+│  SECONDARY JSON METADATA AREA                           │
+│           - Backup copy of JSON metadata                |                                                         │                                                         |
+├─────────────────────────────────────────────────────────┤
+│  SECONDARY HEADER (4 KiB)                               │
+├─────────────────────────────────────────────────────────┤
+│  KEYSLOTS AREA                                          |
+|                                                         |
+|             Slot 0                                      |
+|             Slot 1                                      |
+|             ...                                         |
+|             Slot 31                                     | 
+|  Encrypted Volume Key Material                          │
+├─────────────────────────────────────────────────────────┤
+│                                                         │
+│  DATA SEGMENT                                           │
+│                                                         |  
+|  AES-XTS sector-encrypted data                          |
+|  ext4 / xfs / erofs / squashfs / raw image              │
 │                                                         │
 └─────────────────────────────────────────────────────────┘
-data_offset = (2 × metadata_size) + keyslots_size
+
 ```
 
 ### Properties
@@ -578,12 +586,9 @@ This section describes about the **Required** and **Optional** properties used t
 
     ```json
     "mediaType": "application/vnd.rdk.package.content.layer.v1.erofs.lz4+dmverity+encrypted"
-    "mediaType": "application/vnd.rdk.package.content.layer.v1.erofs+dmverity+encrypted"
-    "mediaType": "application/vnd.rdk.package.content.layer.v1.tar+gzip+encrypted"
-    "mediaType": "application/vnd.rdk.package.content.layer.v1.zip+encrypted"
     ```
 
-**2. encryptedDigest (Required)**
+**2. digest (Required)**
 
 * **Type**: String (sha256 digest of encrypted blob)
 * **Description**: SHA-256 digest of the LUKS2 container blob (not the original plaintext). The LUKS2 container is larger than the original content due to the LUKS2 header overhead (~16MB)
@@ -594,7 +599,7 @@ This section describes about the **Required** and **Optional** properties used t
     "digest": "sha256:a069714e5aac375e9fe89c6ba743dc96a49a3d2ebbeff01390529379d071223b"
     ```
 
-**3. encryptedSize (Required)**
+**3. size (Required)**
 * **Type**: Integer
 * **Description**: Size in bytes of the LUKS2 container blob. Always larger than the original content by at least the LUKS2 header size (typically 4–16 MB depending on --luks2-metadata-size and --luks2-keyslots-size configuration).
 * **Example**:
@@ -604,12 +609,11 @@ This section describes about the **Required** and **Optional** properties used t
     ```
 
 **4. encryptionKey (Required)**
-* **Type**: String (base64-encoded JWE compact serialization)
+* **Type**: String (base64-encoded JWE General JSON serialization)
 * **Description**:
     * JWE (JSON Web Encryption) token containing the dm-crypt/LUKS master key wrapped with the recipient's RSA public key
     * The master key is the 512-bit raw key used to open the LUKS2 container (passed via --master-key-file to cryptsetup)
     * Stored as an annotation on the Content Layer of the Package Manifest
-    * Follows RFC 7516 (JWE Compact Serialization)
 * **JWE Header**:
 
     ```json
@@ -695,14 +699,14 @@ This section describes about the **Required** and **Optional** properties used t
 
 ```json
 {
-  "mediaType": "application/vnd.rdk.package.content.layer.v1.erofs+dmverity+encrypted",
+  "mediaType": "application/vnd.rdk.package.content.layer.v1.erofs+lz4+dmverity+encrypted",
   "digest": "sha256:a069714e5aac375e9fe89c6ba743dc96a49a3d2ebbeff01390529379d071223b",
   "size": 31219712,
   "annotations": {
     "org.rdk.package.content.dmverity.roothash": "e8bbfa9a6f06ad0507f57b6a998c329430e47b2ff0fdcac17f5b22b72e8797ca",
     "org.rdk.package.content.dmverity.offset": "4096",
     "org.rdk.package.content.dmverity.salt": "33e130b3d76367806d458cd40464a7c6e713f15d36ba8b703364613a598ae760",
-    "org.opencontainers.image.enc.keys.jwe": "eyJhbGciOiJSU0EtT0FFUC0yNTYiLCJlbmMiOiJBMjU2R0NNIiwia2lkIjoicmVjaXBpZW50LWtleS0xIn0.<encrypted_key>.<iv>.<ciphertext>.<tag>",
+    "org.opencontainers.image.enc.keys.jwe": "eyJhbGciOiJSU0EtT0FFUC0yNTYiLCJlbmMiOiJBMjU2R0NNIiwia2lkIjoicmVjaXBpZW50LWtleS0xIn0",
     "org.opencontainers.image.dmcrypt.cipher": "aes-xts-plain64",
     "org.opencontainers.image.dmcrypt.salt": "dGVzdF9zYWx0X2V4YW1wbGVfc2FsdF92YWx1ZWhlcmU=",
     "org.opencontainers.image.dmcrypt.keysize": "512",
@@ -728,11 +732,14 @@ This section describes about the **Required** and **Optional** properties used t
   },
   "layers": [
     {
-      "mediaType": "application/vnd.rdk.package.content.layer.v1.erofs+dmverity+encrypted",
+      "mediaType": "application/vnd.rdk.package.content.layer.v1.erofs+lz4+dmverity+encrypted",
       "digest": "sha256:a069714e5aac375e9fe89c6ba743dc96a49a3d2ebbeff01390529379d071223b",
       "size": 31219712,
       "annotations": {
-        "org.opencontainers.image.enc.keys.jwe": "<JWE-compact-token>",
+        "org.rdk.package.content.dmverity.roothash": "<hex-dmverity-root-hash>",
+        "org.rdk.package.content.dmverity.offset": "<decimal-dmverity-offset>",
+        "org.rdk.package.content.dmverity.salt": "<hex-dmverity-salt>",
+        "org.opencontainers.image.enc.keys.jwe": "<JWE-general-JSON-token>",
         "org.opencontainers.image.dmcrypt.cipher": "aes-xts-plain64",
         "org.opencontainers.image.dmcrypt.salt": "<base64-luks-keyslot-salt>",
         "org.opencontainers.image.dmcrypt.keysize": "512",
@@ -748,12 +755,17 @@ This section describes about the **Required** and **Optional** properties used t
 Encryption is applied ONLY to the Content blob of the Target Manifest (Plaintext Package Manifest), not to the Signature Manifest.
 
 Target Manifest (Plain Package)
+
   ├── Config layer    (unencrypted metadata)
+  
   └── Content layer   (plaintext blob → replaced with LUKS2 container)
 
 Signature Manifest (Attached to Target)
+
   ├── References: sha256-<target_manifest_digest>.sig
+
   ├── Contains signature of plaintext target manifest
+
   └── Never encrypted
 
 [bolt-tool](https://github.com/rdkcentral/bolt-tools/blob/main/bolt/docs/make.md) is the sole orchestrator. dm-crypt + LUKS only performs block encryption:
@@ -761,7 +773,7 @@ Signature Manifest (Attached to Target)
 * **bolt-tool** invokes **cryptsetup luksFormat** to create the LUKS2 container
 * **bolt-tool** invokes **cryptsetup luksOpen**  to mount the container and writes the content layer blob into it
 * **bolt-tool** invokes **cryptsetup luksDump** to extract salt and cipher for annotation
-* **bolt-tool** performs RSA-OAEP-256 wrapping of the master key and constructs the JWE token
+* **bolt-tool** performs wrapping of the master key and constructs the JWE token
 * **bolt-tool** updates the OCI manifest with new digest, size, mediaType, and all annotations
 * The master key exists only in process memory during encryption; it is never persisted to disk in plaintext
 

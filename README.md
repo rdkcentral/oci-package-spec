@@ -1,5 +1,5 @@
 # RALF (RDK Application Layer Format) Specification
-**Version: 1.1.0**
+**Version: 1.2.0**
 
 This repository contains the **RALF (RDK Application Layer Format) Specification**, which defines a standard for packaging applications, runtimes, and other resources as OCI (Open Container Initiative) artifacts for RDK devices.
 
@@ -7,7 +7,7 @@ RALF packages are distributed as single files with the `.ralf` extension (ZIP or
 
 ## Specification Documents
 
-*   **[RALF Format Specification (format.md)](format.md):** This document describes the structure of a RALF package (`.ralf`), including the file format (ZIP/Tar), internal OCI layout, layers, media types, and the **Cosign-based signing** mechanism.
+*   **[RALF Format Specification (format.md)](format.md):** This document describes the structure of a RALF package (`.ralf`), including the file format (ZIP/Tar), internal OCI layout, layers, media types, **Cosign-based signing** mechanism and **OCI content layer encryption** in RALF packages **using dm-crypt+luks**.
 
 *   **[Package Metadata Specification (metadata.md)](metadata.md):** This document defines the metadata that can be included in a package's config layer. This metadata provides essential information such as package name, version, dependencies, permissions, and resource requirements.
 

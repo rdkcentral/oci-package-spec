@@ -787,7 +787,7 @@ When both encryption and signing mechanism are used, MUST perform operations in 
 4. Generate the final encrypted package manifest.
 5. Generate the cosign signature over the encrypted package manifest.
 
-Signature verification MUST be attempted before the content-layer decryption.
+When a signature manifest is present, signature verification MUST succeed before content-layer decryption is attempted.
 
 
 

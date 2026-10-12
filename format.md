@@ -694,11 +694,35 @@ This section describes about the **Required** and **Optional** properties used t
 * The JWE-wrapped master key is base64-encoded and stored as `org.opencontainers.image.enc.keys.jwe` annotation on the Content Layer
 * The Content Layer digest and size reference the LUKS2 container blob
 
+#### dm-verity Metadata for Encrypted EROFS Layers
+
+For an EROFS content layer using both dm-verity and LUKS2 encryption, the dm-verity annotations describe the plaintext EROFS + dm-verity representation stored within the LUKS2 data segment.
+
+The `org.rdk.package.content.dmverity.offset` annotation specifies the byte offset of the dm-verity hash tree relative to the beginning of the decrypted LUKS2 data segment. It MUST NOT be interpreted as an offset from the beginning of the encrypted OCI layer blob or from the beginning of the LUKS2 container.
+
+The dm-verity root hash, salt, and offset MUST be generated from the plaintext EROFS + dm-verity representation before that representation is stored in the LUKS2 encrypted data segment.
+
+Therefore, for an encrypted EROFS layer, the layer processing order is: 
+1. Retrieve and validate the encrypted OCI layer blob using the digest and size from the OCI container.
+2. Recvover the LUKS master key using the JWE carried by the `org.opencontainers.image.enc.keys.jwe` annotation.
+3. Open the LUKS2 container and establish the decrypted dm-crypt mapping.
+4. Interpret `org.rdk.package.content.dmverity.offset` relative to the beginning of the decrypted LUKS2 data segment.
+5. Configure dm-verity over the decrypted content using the supplied root hash, salt and hash tree offset.
+6. Mount the verified EROFS filesystem.
+
+Consequently, the LUKS2 header, metadata and keyslot areas MUST NOT be included when interpreting `org.rdk.package.content.dmverity.offset`.
+
+
+
 #### Layer Descriptor with dm-crypt + LUKS Encryption
+
+The Following example represents an EROFS + dm-verity content layer stored inside a LUKS2 encrypted container.
+
+The descriptor `digest` and `size` refer to the complete encrypted LUKS2 container blob. The dm-verity annotations, however describe theplaintext EROFS + dm-verity representation inside the descrypted LUKS2 data segment.
 
 ```json
 {
-  "mediaType": "application/vnd.rdk.package.content.layer.v1.erofs+lz4+dmverity+encrypted",
+  "mediaType": "application/vnd.rdk.package.content.layer.v1.erofs.lz4+dmverity+encrypted",
   "digest": "sha256:a069714e5aac375e9fe89c6ba743dc96a49a3d2ebbeff01390529379d071223b",
   "size": 31219712,
   "annotations": {
@@ -713,6 +737,10 @@ This section describes about the **Required** and **Optional** properties used t
   }
 }  
 ```
+
+
+For a `+dmverity+encrypted` content layer, the dm-verity annotation values are those associated with the plaintext EROFS + dm-verity representation.
+In particular, `org.rdk.package.content.dmverity.offset` is relative to the beginning of the decrypted LUKS2 data segment. The offset MUST NOT include the LUKS2 header, metadata, keyslot, or other LUKS2 container overhead. The OCI descriptor `digest` and `size`, refer to the complete encrypted LUKS2 container blob.
 
 #### Encrypted Package Manifest
 
@@ -731,7 +759,7 @@ This section describes about the **Required** and **Optional** properties used t
   },
   "layers": [
     {
-      "mediaType": "application/vnd.rdk.package.content.layer.v1.erofs+lz4+dmverity+encrypted",
+      "mediaType": "application/vnd.rdk.package.content.layer.v1.erofs.lz4+dmverity+encrypted",
       "digest": "sha256:a069714e5aac375e9fe89c6ba743dc96a49a3d2ebbeff01390529379d071223b",
       "size": 31219712,
       "annotations": {

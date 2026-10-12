@@ -8,7 +8,7 @@ EROFS uses fixed-size output compression: variable input fits into fixed physica
 
 When dm-verity is used, the hash tree is appended immediately after the EROFS image in the plaintext EROFS + dm-verity representation. The root hash, salt, and hash-tree offset are carried as OCI descriptor annotations (see section 6). 
 
-If the content layer is subsequently encrypted using LUKS2, this plaintext EROFS + dm-verity representation is stored within the LUKS2 data segment. In that case, dm-verity metadata continues to describe the decrypted EROFS + dm-verity representation rather that the outer encrypted OCI layer blob.
+If the content layer is subsequently encrypted using LUKS2, this plaintext EROFS + dm-verity representation is stored within the LUKS2 data segment. In that case, dm-verity metadata continues to describe the decrypted EROFS + dm-verity representation rather than the outer encrypted OCI layer blob.
 
 ## 2. Media Types
 

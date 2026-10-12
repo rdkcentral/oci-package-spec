@@ -704,7 +704,7 @@ The dm-verity root hash, salt, and offset MUST be generated from the plaintext E
 
 Therefore, for an encrypted EROFS layer, the layer processing order is: 
 1. Retrieve and validate the encrypted OCI layer blob using the digest and size from the OCI container.
-2. Recvover the LUKS master key using the JWE carried by the `org.opencontainers.image.enc.keys.jwe` annotation.
+2. Recover the LUKS master key using the JWE carried by the `org.opencontainers.image.enc.keys.jwe` annotation.
 3. Open the LUKS2 container and establish the decrypted dm-crypt mapping.
 4. Interpret `org.rdk.package.content.dmverity.offset` relative to the beginning of the decrypted LUKS2 data segment.
 5. Configure dm-verity over the decrypted content using the supplied root hash, salt and hash tree offset.
@@ -718,7 +718,7 @@ Consequently, the LUKS2 header, metadata and keyslot areas MUST NOT be included 
 
 The Following example represents an EROFS + dm-verity content layer stored inside a LUKS2 encrypted container.
 
-The descriptor `digest` and `size` refer to the complete encrypted LUKS2 container blob. The dm-verity annotations, however describe theplaintext EROFS + dm-verity representation inside the descrypted LUKS2 data segment.
+The descriptor `digest` and `size` refer to the complete encrypted LUKS2 container blob. The dm-verity annotations, however describe the plaintext EROFS + dm-verity representation inside the descrypted LUKS2 data segment.
 
 ```json
 {

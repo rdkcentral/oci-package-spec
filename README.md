@@ -7,7 +7,7 @@ RALF packages are distributed as single files with the `.ralf` extension (ZIP or
 
 ## Specification Documents
 
-*   **[RALF Format Specification (format.md)](format.md):** This document describes the structure of a RALF package (`.ralf`), including the file format (ZIP/Tar), internal OCI layout, layers, media types, **Cosign-based signing** mechanism and **OCI content layer encryption** in RALF packages **using dm-crypt+LUKS**.
+*   **[RALF Format Specification (format.md)](format.md):** This document describes the structure of a RALF package (`.ralf`), including the file format (ZIP/Tar), internal OCI layout, layers, media types, **Cosign-based signing** mechanism and **OCI content layer encryption** in RALF packages **using dm-crypt + LUKS**.
 
 *   **[Package Metadata Specification (metadata.md)](metadata.md):** This document defines the metadata that can be included in a package's config layer. This metadata provides essential information such as package name, version, dependencies, permissions, and resource requirements.
 

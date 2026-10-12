@@ -812,7 +812,8 @@ When both encryption and signing mechanism are used, MUST perform operations in 
 2. Encrypt the content layer.
 3. Replace the content layer digest, size, mediaType, and encryption annotations.
 4. Generate the final encrypted package manifest.
-5. Generate the cosign signature over the encrypted package manifest.
+5. Update the target descriptor in `index.json` with the final encrypted manifest digest and size
+6. Generate the cosign signature over the encrypted package manifest.
 
 When a signature manifest is present, signature verification MUST succeed before content-layer decryption is attempted.
 

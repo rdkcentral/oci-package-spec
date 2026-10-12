@@ -517,7 +517,7 @@ Package Structure with dm-crypt+LUKS Encryption: A complete encrypted bolt packa
 
 * Original content blob encrypted into a LUKS2 container
 * The LUKS2 container file replaces the original content layer blob in the OCI layout
-* LUKS2 container structure: [LUKS2 Header (~4–16 MB)] | [AES-XTS Encrypted Content Data]
+* LUKS2 container structure: [LUKS2 Header (~4–16 MB)] | [Encrypted Content Data]
 * mediaType appended with +encrypted suffix
 * Digest replaced with sha256 of the LUKS2 container blob
 * Size replaced with size of the LUKS2 container blob
@@ -562,9 +562,8 @@ Offset 0
 |  Encrypted Volume Key Material                          │
 ├─────────────────────────────────────────────────────────┤
 │                                                         │
-│  DATA SEGMENT                                           │
-│                                                         |  
-|  AES-XTS sector-encrypted data                          |
+│  ENCRYPTED DATA SEGMENT                                 │
+│                                                         |
 |  ext4 / xfs / erofs / squashfs / raw image              │
 │                                                         │
 └─────────────────────────────────────────────────────────┘
@@ -718,7 +717,7 @@ Consequently, the LUKS2 header, metadata and keyslot areas MUST NOT be included 
 
 The Following example represents an EROFS + dm-verity content layer stored inside a LUKS2 encrypted container.
 
-The descriptor `digest` and `size` refer to the complete encrypted LUKS2 container blob. The dm-verity annotations, however describe the plaintext EROFS + dm-verity representation inside the descrypted LUKS2 data segment.
+The descriptor `digest` and `size` refer to the complete encrypted LUKS2 container blob. The dm-verity annotations, however describe the plaintext EROFS + dm-verity representation inside the decrypted LUKS2 data segment.
 
 ```json
 {

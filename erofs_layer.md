@@ -83,7 +83,7 @@ For an encrypted EROFS layer, the OCI layer blob is a LUKS2 container. In this c
 For an unencrypted layer, dm-verity verification operates directly on the plaintext layer representation. The first `offset` bytes contain the EROFS filesystem data and the content beginning at `offset` contains the dm-verity hash tree.
 For an encrypted layer, the LUKS2 container MUST first be unlocked and mapped through dm-crypt. The dm-verity offset MUST then be interpreted relative to the beginning of that decrypted mapping. dm-verity verification MUST therefore operate on the decrypted content rather than directly on the encrypted OCI layer blob. 
 
-The processing order for an unencrypted EROFS layer is therefore:
+The processing order for an encrypted EROFS layer is therefore:
 1. Open the LUKS2 container.
 2. Establish the decrypted dm-crypt mapping.
 3. Apply the dm-verity configuration to the decrypted content using the descriptor root hash, salt, and hash tree offset.

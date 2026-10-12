@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.0] - 2026-10-07
 
 ### Added
-- format.md includes, specification for OCI content layer block level encryption in RALF packages using dmcrypt+luks
+- format.md includes specification for OCI content layer block level encryption in RALF packages using `dm-crypt+LUKS`
 
 
 ## [1.1.0] - 2026-06-01

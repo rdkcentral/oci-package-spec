@@ -1,5 +1,5 @@
 # Package Metadata Specification
-**Version: 1.1.0**
+**Version: 1.2.0**
 
 This specification describes the metadata that is stored in a package file.
 

@@ -797,7 +797,7 @@ Signature Manifest (Attached to Encrypted Target)
 [bolt-tool](https://github.com/rdkcentral/bolt-tools/blob/main/bolt/docs/make.md) is the sole orchestrator. dm-crypt + LUKS only performs block encryption:
 * **bolt-tool** generates the 512-bit master key (random, in-process)
 * **bolt-tool** invokes **cryptsetup luksFormat** to create the LUKS2 container
-* **bolt-tool** invokes **cryptsetup luksOpen**  to mount the container and writes the content layer blob into it
+* **bolt-tool** invokes **cryptsetup luksOpen**  to establish the decrypted block-device mapping and writes the content layer blob to that mapping
 * **bolt-tool** invokes **cryptsetup luksDump** to extract salt and cipher for annotation
 * **bolt-tool** performs wrapping of the master key and constructs the JWE token
 * **bolt-tool** updates the OCI manifest with new digest, size, mediaType, and all annotations

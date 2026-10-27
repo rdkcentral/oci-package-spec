@@ -69,8 +69,11 @@ The **content** layer also has a defined media type, depending on payload:
 | application/vnd.rdk.package.content.layer.v1.erofs.zstd+dmverity   | EROFS image (zstd-compressed) with appended dm-verity hash tree. Requires `CONFIG_EROFS_FS_ZIP_ZSTD` (Linux 6.x). Same annotations as above.                                                  |
 | application/vnd.rdk.package.content.layer.v1.erofs.nocmpr+dmverity | EROFS image (uncompressed) with appended dm-verity hash tree. Same annotations as above.                                                                                                      |
 | application/vnd.rdk.package.content.layer.v1.erofs+dmverity        | **Deprecated.** Umbrella type produced by pre-spec tooling. Readers MAY accept it and MUST treat it as `…erofs.lz4+dmverity`. New producers MUST NOT emit it.                                  |
-| application/vnd.rdk.package.content.layer.v1.erofs.lz4+dmverity+encrypted    | EROFS image (lz4hc-compressed) with appended dm-verity hash tree, stored inside a LUKS2/dm-crypt encrypted container. Requires encryption key(jwe) annotations.           |
+| application/vnd.rdk.package.content.layer.v1.erofs.lz4+dmverity+encrypted    | EROFS image (lz4hc-compressed) with appended dm-verity hash tree, stored inside a LUKS2/dm-crypt encrypted container. Requires the `org.rdk.package.content.dmcrypt.keys.jwe` annotation and the dm-verity annotations above. See [Encryption](#encryption). |
+| application/vnd.rdk.package.content.layer.v1.erofs.zstd+dmverity+encrypted    | EROFS image (zstd-compressed) with appended dm-verity hash tree, stored inside a LUKS2/dm-crypt encrypted container. Requires `CONFIG_EROFS_FS_ZIP_ZSTD` (Linux 6.x). Same annotations as the lz4 encrypted variant. |
+| application/vnd.rdk.package.content.layer.v1.erofs.nocmpr+dmverity+encrypted    | EROFS image (uncompressed) with appended dm-verity hash tree, stored inside a LUKS2/dm-crypt encrypted container. Same annotations as the lz4 encrypted variant. |
 
+`+encrypted` is defined only for the three EROFS + dm-verity types above. See [Encryption Principles](#encryption-principles).
 
 Each layer is associated with its own Media Type, which is stored in the OCI Descriptor for that layer:
 
@@ -78,7 +81,7 @@ Each layer is associated with its own Media Type, which is stored in the OCI Des
 | -------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Package OCI Artifact | JSON Object              | application/vnd.rdk.package.config.v1+json                                                                                                                                                                                   | Custom package metadata - [package.json](metadata.json)                                                                                                                                                                                                                       |
 |                      | JSON Object                     | application/vnd.oci.empty.v1+json                                                                                                                                                                                            | _Application_<br><br> Is for packages that consist only out of metadata (eg. web apps) - config layer and hence have no real content layer - payload data. As defined by the OCI Image Specification, the corresponding content layer then consists solely of an empty JSON object, being {}                           |
-|                      | binary data (byte array) | application/vnd.rdk.package.content.layer.v1.tar<br>application/vnd.rdk.package.content.layer.v1.tar+gzip<br>application/vnd.rdk.package.content.layer.v1.zip<br>application/vnd.rdk.package.content.layer.v1.erofs.lz4+dmverity<br>application/vnd.rdk.package.content.layer.v1.erofs.zstd+dmverity<br>application/vnd.rdk.package.content.layer.v1.erofs.nocmpr+dmverity<br>application/vnd.rdk.package.content.layer.v1.erofs+dmverity _(deprecated; accept as erofs.lz4+dmverity)_<br>application/vnd.rdk.package.content.layer.v1.erofs.lz4+dmverity+encrypted | _Runtime_<br><br>Consists of specific binaries, resources, configurations and shared libraries that build up final runtime, eg.<br><br>- rdkbrowser<br>- cobalt<br>- flutter<br>- luna<br><br>_Application_<br><br>Contains application binary, resources, shared libraries, etc. |
+|                      | binary data (byte array) | application/vnd.rdk.package.content.layer.v1.tar<br>application/vnd.rdk.package.content.layer.v1.tar+gzip<br>application/vnd.rdk.package.content.layer.v1.zip<br>application/vnd.rdk.package.content.layer.v1.erofs.lz4+dmverity<br>application/vnd.rdk.package.content.layer.v1.erofs.zstd+dmverity<br>application/vnd.rdk.package.content.layer.v1.erofs.nocmpr+dmverity<br>application/vnd.rdk.package.content.layer.v1.erofs+dmverity _(deprecated; accept as erofs.lz4+dmverity)_<br>application/vnd.rdk.package.content.layer.v1.erofs.lz4+dmverity+encrypted<br>application/vnd.rdk.package.content.layer.v1.erofs.zstd+dmverity+encrypted<br>application/vnd.rdk.package.content.layer.v1.erofs.nocmpr+dmverity+encrypted | _Runtime_<br><br>Consists of specific binaries, resources, configurations and shared libraries that build up final runtime, eg.<br><br>- rdkbrowser<br>- cobalt<br>- flutter<br>- luna<br><br>_Application_<br><br>Contains application binary, resources, shared libraries, etc. |
 
 OCI Artifact Manifest also contains an artifactType always set to:
 
@@ -498,7 +501,16 @@ Packages MAY be encrypted using dm-crypt+LUKS for block-level encryption of OCI 
 ### Encryption Principles
 
 1. Encryption applies to content layers only; config layers and signature layer remain unencrypted.
-2. MediaType of the content layer signal encrypted content via +encrypted suffix to base mediaType.
+2. The content layer mediaType signals encrypted content via the `+encrypted` suffix. The suffix is valid ONLY on the following EROFS + dm-verity base types, because LUKS2 is a block-level container whose decrypted data segment must be mountable as a filesystem.
+
+   | Allowed Encrypted Media Type                                                   |
+   | ------------------------------------------------------------------------------ |
+   | `application/vnd.rdk.package.content.layer.v1.erofs.lz4+dmverity+encrypted`    |
+   | `application/vnd.rdk.package.content.layer.v1.erofs.zstd+dmverity+encrypted`   |
+   | `application/vnd.rdk.package.content.layer.v1.erofs.nocmpr+dmverity+encrypted` |
+
+   No other combination is defined. In particular, `tar+encrypted`, `tar+gzip+encrypted`, `zip+encrypted` and `erofs+dmverity+encrypted` (the deprecated umbrella type) are invalid. Producers MUST NOT emit them, and readers MUST reject any content layers whose mediaType ends in `+encrypted` but is not one of the three types above.
+
 3. Symmetric Master Key is generated by [bolt-tool](https://github.com/rdkcentral/bolt-tools/blob/main/bolt/docs/make.md), wrapped with the recipient's public key, and delivered via OCI manifest annotations as a JWE token.
 4. Encryption updates the OCI package manifest (content layer digest, size, mediaType and annotations). Therefore, if package signing is used, the encrypted manifest MUST be signed after encryption. Cosign signatures bind to the final encrypted manifest digest.
 5. dm-crypt + LUKS performs only the block-level encryption of the content blob; all JWE wrapping, annotation injection, and manifest update are performed by bolt-tool. 
@@ -518,7 +530,7 @@ Package Structure with dm-crypt+LUKS Encryption: A complete encrypted bolt packa
 * Original content blob encrypted into a LUKS2 container
 * The LUKS2 container file replaces the original content layer blob in the OCI layout
 * LUKS2 container structure: [LUKS2 Header (~4–16 MB)] | [Encrypted Content Data]
-* mediaType appended with +encrypted suffix
+* mediaType is the `+encrypted` variant of the EROFS + dm-verity base type (see [Encryption Principles](#encryption-principles), point 2)
 * Digest replaced with sha256 of the LUKS2 container blob
 * Size replaced with size of the LUKS2 container blob
 
@@ -530,7 +542,7 @@ Package Structure with dm-crypt+LUKS Encryption: A complete encrypted bolt packa
 
 **4. Encryption Metadata (Content Layer Manifest Annotations — injected by bolt-tool)**
 
-* JWE-wrapped master key (`org.opencontainers.image.enc.keys.jwe`)
+* JWE-wrapped master key (`org.rdk.package.content.dmcrypt.keys.jwe`)
 
 ### LUKS2 Container Structure
 
@@ -564,7 +576,7 @@ Offset 0
 │                                                         │
 │  ENCRYPTED DATA SEGMENT                                 │
 │                                                         |
-|  ext4 / xfs / erofs / squashfs / raw image              │
+|  EROFS image + appended dm-verity hash tree             │
 │                                                         │
 └─────────────────────────────────────────────────────────┘
 
@@ -578,9 +590,9 @@ This section describes about the **Required** and **Optional** properties used t
 
 * **Type**: String
 * **Description**:
-    * The mediaType property of the Content Layer, MUST append +encrypted suffix to base mediaType, to signal encrypted payloads
-    * The .bolt package has multiple layers like config, content and signature layers. Whereas we will be encrypting only the content layer of the package and the respective layer mediaType property MUST append +encrypted to signal the encrypted payload
-* **Pattern**: <base-media-type>+encrypted
+    * The mediaType property of the Content Layer, MUST be one of the three `+encrypted` types listed in [Encryption Principles](#encryption-principles), point 2
+    * Only the content layer is encrypted. Config and signature layuers are never encrypted
+* **Pattern**: one of `...erofs.lz4+dmverity+encrypted`, `...erofs.zstd+dmverity+encrypted`, `...erofs.nocmpr+dmverity+encrypted`
 * **Example**:
 
     ```json
@@ -627,7 +639,7 @@ This section describes about the **Required** and **Optional** properties used t
 
     ```json
     "annotations": {
-      "org.opencontainers.image.enc.keys.jwe": "eyJhbGciOiJSU0EtT0FFUC0yNTYiLCJlbmMiOiJBMjU2R0NNIn0..."
+      "org.rdk.package.content.dmcrypt.keys.jwe": "eyJhbGciOiJSU0EtT0FFUC0yNTYiLCJlbmMiOiJBMjU2R0NNIn0..."
     }
     ```
 
@@ -644,7 +656,7 @@ This section describes about the **Required** and **Optional** properties used t
 
     ```json
     "annotations": {
-      "org.opencontainers.image.dmcrypt.cipher": "aes-xts-plain64"
+      "org.rdk.package.content.dmcrypt.cipher": "aes-xts-plain64"
     }
     ```
 
@@ -661,7 +673,7 @@ This section describes about the **Required** and **Optional** properties used t
 
     ```json
     "annotations": {
-      "org.opencontainers.image.dmcrypt.salt": "dGVzdF9zYWx0X2V4YW1wbGVfc2FsdF92YWx1ZWhlcmU="
+      "org.rdk.package.content.dmcrypt.salt": "dGVzdF9zYWx0X2V4YW1wbGVfc2FsdF92YWx1ZWhlcmU="
     }
     ```
 
@@ -672,7 +684,7 @@ This section describes about the **Required** and **Optional** properties used t
 
     ```json
     "annotations": {
-      "org.opencontainers.image.dmcrypt.keysize": "512"
+      "org.rdk.package.content.dmcrypt.keysize": "512"
     }
     ```
 
@@ -683,41 +695,33 @@ This section describes about the **Required** and **Optional** properties used t
 
     ```json
     "annotations": {
-      "org.opencontainers.image.dmcrypt.type": "luks2"
+      "org.rdk.package.content.dmcrypt.type": "luks2"
     }
     ```
 
 ### Storage and Representation
 
-* The mediaType of the Content Layer MUST append +encrypted suffix to base mediaType
-* The JWE-wrapped master key is base64-encoded and stored as `org.opencontainers.image.enc.keys.jwe` annotation on the Content Layer
+* The mediaType property of the Content Layer MUST be one of the three `+encrypted` types listed in ([Encryption Principles](#encryption-principles), point 2). Readers MUST reject any other value.
+* The JWE-wrapped master key is base64-encoded and stored as `org.rdk.package.content.dmcrypt.keys.jwe` annotation on the Content Layer
 * The Content Layer digest and size reference the LUKS2 container blob
 
 #### dm-verity Metadata for Encrypted EROFS Layers
 
-For an EROFS content layer using both dm-verity and LUKS2 encryption, the dm-verity annotations describe the plaintext EROFS + dm-verity representation stored within the LUKS2 data segment.
+For a `+dmverity+encrypted` content layer, the dm-verity annotations describe the plaintext EROFS + dm-verity representation inside the LUKS2 data segment, not the outer encrypted blob. The definition of `org.rdk.package.content.dmverity.offset` and the rules for generating the values are in [EROFS Layer Specification - Offset Semantics](erofs_layer.md#offset-semantics).
 
-The `org.rdk.package.content.dmverity.offset` annotation specifies the byte offset of the dm-verity hash tree relative to the beginning of the decrypted LUKS2 data segment. It MUST NOT be interpreted as an offset from the beginning of the encrypted OCI layer blob or from the beginning of the LUKS2 container.
-
-The dm-verity root hash, salt, and offset MUST be generated from the plaintext EROFS + dm-verity representation before that representation is stored in the LUKS2 encrypted data segment.
-
-Therefore, for an encrypted EROFS layer, the layer processing order is: 
-1. Retrieve and validate the encrypted OCI layer blob using the digest and size from the OCI container.
-2. Recover the LUKS master key using the JWE carried by the `org.opencontainers.image.enc.keys.jwe` annotation.
+The layer processing order is: 
+1. Retrieve and validate the encrypted OCI layer blob using the descriptor `digest` and `size`.
+2. Recover the LUKS master key from the `org.rdk.package.content.dmcrypt.keys.jwe` annotation.
 3. Open the LUKS2 container and establish the decrypted dm-crypt mapping.
-4. Interpret `org.rdk.package.content.dmverity.offset` relative to the beginning of the decrypted LUKS2 data segment.
-5. Configure dm-verity over the decrypted content using the supplied root hash, salt and hash tree offset.
-6. Mount the verified EROFS filesystem.
-
-Consequently, the LUKS2 header, metadata and keyslot areas MUST NOT be included when interpreting `org.rdk.package.content.dmverity.offset`.
-
+4. Configure dm-verity over the decrypted content using the root hash, salt and offset annotations.
+5. Mount the verified EROFS filesystem.
 
 
 #### Layer Descriptor with dm-crypt + LUKS Encryption
 
 The Following example represents an EROFS + dm-verity content layer stored inside a LUKS2 encrypted container.
 
-The descriptor `digest` and `size` refer to the complete encrypted LUKS2 container blob. The dm-verity annotations, however describe the plaintext EROFS + dm-verity representation inside the decrypted LUKS2 data segment.
+The descriptor `digest` and `size` refer to the complete encrypted LUKS2 container blob. The dm-verity annotations are interpreted as described in [Offset Semantics](erofs_layer.md#offset-semantics).
 
 ```json
 {
@@ -728,18 +732,14 @@ The descriptor `digest` and `size` refer to the complete encrypted LUKS2 contain
     "org.rdk.package.content.dmverity.roothash": "e8bbfa9a6f06ad0507f57b6a998c329430e47b2ff0fdcac17f5b22b72e8797ca",
     "org.rdk.package.content.dmverity.offset": "4096",
     "org.rdk.package.content.dmverity.salt": "33e130b3d76367806d458cd40464a7c6e713f15d36ba8b703364613a598ae760",
-    "org.opencontainers.image.enc.keys.jwe": "eyJhbGciOiJSU0EtT0FFUC0yNTYiLCJlbmMiOiJBMjU2R0NNIiwia2lkIjoicmVjaXBpZW50LWtleS0xIn0",
-    "org.opencontainers.image.dmcrypt.cipher": "aes-xts-plain64",
-    "org.opencontainers.image.dmcrypt.salt": "dGVzdF9zYWx0X2V4YW1wbGVfc2FsdF92YWx1ZWhlcmU=",
-    "org.opencontainers.image.dmcrypt.keysize": "512",
-    "org.opencontainers.image.dmcrypt.type": "luks2"
+    "org.rdk.package.content.dmcrypt.keys.jwe": "eyJhbGciOiJSU0EtT0FFUC0yNTYiLCJlbmMiOiJBMjU2R0NNIiwia2lkIjoicmVjaXBpZW50LWtleS0xIn0",
+    "org.rdk.package.content.dmcrypt.cipher": "aes-xts-plain64",
+    "org.rdk.package.content.dmcrypt.salt": "dGVzdF9zYWx0X2V4YW1wbGVfc2FsdF92YWx1ZWhlcmU=",
+    "org.rdk.package.content.dmcrypt.keysize": "512",
+    "org.rdk.package.content.dmcrypt.type": "luks2"
   }
 }  
 ```
-
-
-For a `+dmverity+encrypted` content layer, the dm-verity annotation values are those associated with the plaintext EROFS + dm-verity representation.
-In particular, `org.rdk.package.content.dmverity.offset` is relative to the beginning of the decrypted LUKS2 data segment. The offset MUST NOT include the LUKS2 header, metadata, keyslot, or other LUKS2 container overhead. The OCI descriptor `digest` and `size`, refer to the complete encrypted LUKS2 container blob.
 
 #### Encrypted Package Manifest
 
@@ -765,11 +765,11 @@ In particular, `org.rdk.package.content.dmverity.offset` is relative to the begi
         "org.rdk.package.content.dmverity.roothash": "<hex-dmverity-root-hash>",
         "org.rdk.package.content.dmverity.offset": "<decimal-dmverity-offset>",
         "org.rdk.package.content.dmverity.salt": "<hex-dmverity-salt>",
-        "org.opencontainers.image.enc.keys.jwe": "<JWE-general-JSON-token>",
-        "org.opencontainers.image.dmcrypt.cipher": "aes-xts-plain64",
-        "org.opencontainers.image.dmcrypt.salt": "<base64-luks-keyslot-salt>",
-        "org.opencontainers.image.dmcrypt.keysize": "512",
-        "org.opencontainers.image.dmcrypt.type": "luks2"
+        "org.rdk.package.content.dmcrypt.keys.jwe": "<JWE-general-JSON-token>",
+        "org.rdk.package.content.dmcrypt.cipher": "aes-xts-plain64",
+        "org.rdk.package.content.dmcrypt.salt": "<base64-luks-keyslot-salt>",
+        "org.rdk.package.content.dmcrypt.keysize": "512",
+        "org.rdk.package.content.dmcrypt.type": "luks2"
       }
     }
   ]
@@ -780,19 +780,16 @@ In particular, `org.rdk.package.content.dmverity.offset` is relative to the begi
 
 Encryption is applied ONLY to the Content blob of the Target Manifest (Plaintext Package Manifest), not to the Signature Manifest.
 
+```
 Target Manifest (Plain Package)
-
   ├── Config layer    (unencrypted metadata)
-  
   └── Content layer   (plaintext blob → replaced with LUKS2 container)
 
 Signature Manifest (Attached to Encrypted Target)
-
   ├── References: sha256-<encrypted_manifest_digest>.sig
-
   ├── Contains signature of encrypted package manifest
-
   └── Never encrypted
+ ``` 
 
 [bolt-tool](https://github.com/rdkcentral/bolt-tools/blob/main/bolt/docs/make.md) is the sole orchestrator. dm-crypt + LUKS only performs block encryption:
 * **bolt-tool** generates the 512-bit master key (random, in-process)

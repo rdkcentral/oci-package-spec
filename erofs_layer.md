@@ -6,9 +6,7 @@ EROFS (Enhanced Read-Only File System) is the immutable content-layer format use
 
 EROFS uses fixed-size output compression: variable input fits into fixed physical blocks. Compared to SquashFS this minimises I/O amplification and resident memory at the cost of slightly larger images, which matches the runtime profile of RDK devices.
 
-When dm-verity is used, the hash tree is appended immediately after the EROFS image in the plaintext EROFS + dm-verity representation. The root hash, salt, and hash-tree offset are carried as OCI descriptor annotations (see section 6). 
-
-If the content layer is subsequently encrypted using LUKS2, this plaintext EROFS + dm-verity representation is stored within the LUKS2 data segment. In that case, dm-verity metadata continues to describe the decrypted EROFS + dm-verity representation rather than the outer encrypted OCI layer blob.
+When dm-verity is used, the hash tree is appended immediately after the EROFS image. The root hash, salt and hash-tree offset are carried as OCI descriptor annotations (see [section 6](#6-dm-verity-annotations)). If the layer is encrypted with LUKS2, see [Offset Semantics](#offset-semantics) for how the offset is interpreted.
 
 ## 2. Media Types
 
@@ -19,7 +17,7 @@ The content-layer media type encodes the compressor so headend and tooling can r
 | `application/vnd.rdk.package.content.layer.v1.erofs.lz4+dmverity`  | `lz4hc` (encode) / `lz4` (decode) | Baseline. Supported on every EROFS-enabled kernel. |
 | `application/vnd.rdk.package.content.layer.v1.erofs.zstd+dmverity` | `zstd` | Requires `CONFIG_EROFS_FS_ZIP_ZSTD` (Linux 6.x). |
 | `application/vnd.rdk.package.content.layer.v1.erofs.nocmpr+dmverity` | none | Uncompressed. Smallest CPU cost, largest image. |
-
+| `application/vnd.rdk.package.content.layer.v1.erofs.lz4+dmverity+encrypted` | `lz4hc` (encode) / `lz4` (decode) | LZ4-compressed EROFS + dm-verity representation stored inside a LUKS2/dm-crypt encrypted container. dm-verity metadata describes the decrypted EROFS + dm-verity representation |
 
 The legacy umbrella type `application/vnd.rdk.package.content.layer.v1.erofs+dmverity` is deprecated and MUST NOT be produced by new tooling. Readers MAY accept it for backwards compatibility and treat it as `erofs.lz4+dmverity`.
 
@@ -72,22 +70,22 @@ Every EROFS content-layer descriptor (any compressor variant) MUST carry the fol
 | :--- | :--- | :--- |
 | `org.rdk.package.content.dmverity.roothash` | Yes | Hex-encoded SHA-256 root hash of the verity tree. |
 | `org.rdk.package.content.dmverity.salt` | Yes | Hex-encoded salt fed to every hash block (≤ 256 bytes). |
-| `org.rdk.package.content.dmverity.offset` | Yes | Byte offset of the dm-verity hash tree relative to the beginning of the plaintext EROFS + dm-verity representation (= size of the EROFS image). |
+| `org.rdk.package.content.dmverity.offset` | Yes | Byte offset of the dm-verity hash tree (= size of the EROFS image). decimal. See [Offset Semantics](#offset-semantics). |
 
-**Offset Semantics:**
+### Offset Semantics
 
-For an unencrypted EROFS layer, the plaintext EROFS + dm-verity representation is the OCI layer blob itself. Therefore, `org.rdk.package.content.dmverity.offset` is relative to the beginning of the OCI layer blob.
-For an encrypted EROFS layer, the OCI layer blob is a LUKS2 container. In this case, `org.rdk.package.content.dmverity.offset` is relative to the beginning of the decrypted LUKS2 data segment. The offset MUST NOT include the LUKS2 header, metadata, keyslot or other LUKS2 container overhead.
+For an unencrypted EROFS layer, the plaintext EROFS + dm-verity representation is the OCI layer blob itself, so `org.rdk.package.content.dmverity.offset` is relative to the beginning of the OCI layer blob.
+
+For an encrypted EROFS layer, the OCI layer blob is a LUKS2 container. The offset is relative to the beginning of the decrypted LUKS2 data segment and MUST NOT include the LUKS2 header, metadata, keyslot or other container overhead. 
+
+The root hash, salt and offset are generated from the plaintext EROFS + dm-verity representation, before any encryption. Encryption does not change them
 
 **Verification:** 
 
-For an unencrypted layer, dm-verity verification operates directly on the plaintext layer representation. The first `offset` bytes contain the EROFS filesystem data and the content beginning at `offset` contains the dm-verity hash tree.
-For an encrypted layer, the LUKS2 container MUST first be unlocked and mapped through dm-crypt. The dm-verity offset MUST then be interpreted relative to the beginning of that decrypted mapping. dm-verity verification MUST therefore operate on the decrypted content rather than directly on the encrypted OCI layer blob. 
-
-The processing order for an encrypted EROFS layer is therefore:
+For an unencrypted layer, dm-verity runs directly on the layer blob. For an encrypted layer, dm-verity runs on the decrypted dm-crypt mapping, so the processing order for an encrypted EROFS layer is:
 1. Open the LUKS2 container.
 2. Establish the decrypted dm-crypt mapping.
-3. Apply the dm-verity configuration to the decrypted content using the descriptor root hash, salt, and hash tree offset.
+3. Apply the dm-verity configuration to the decrypted content using the descriptor root hash, salt and offset.
 4. Mount the verified EROFS filesystem.
 
 ## 7. Build Commands (erofs-utils)
@@ -137,4 +135,4 @@ mkfs.erofs \
 
 After `mkfs.erofs` completes, append the dm-verity hash tree to `output.erofs` (e.g. via `veritysetup format` with `--hash-offset=$(stat -c%s output.erofs)` against the same file, or an equivalent in-process implementation) and record the resulting root hash, salt and offset as descriptor annotations.
 
-For an encrypted content layer, the resulting EROFS + dm-verity representation is subsequently stored in the LUKS2 data segment. Encryption does not change the dm-verity root hash, salt, or offset. The offset remains relative to the beginning of the decrypted LUKS2 data segment.
+For encrypted layers, see [Offset Semantics](#offset-semantics).

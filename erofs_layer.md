@@ -18,6 +18,8 @@ The content-layer media type encodes the compressor so headend and tooling can r
 | `application/vnd.rdk.package.content.layer.v1.erofs.zstd+dmverity` | `zstd` | Requires `CONFIG_EROFS_FS_ZIP_ZSTD` (Linux 6.x). |
 | `application/vnd.rdk.package.content.layer.v1.erofs.nocmpr+dmverity` | none | Uncompressed. Smallest CPU cost, largest image. |
 | `application/vnd.rdk.package.content.layer.v1.erofs.lz4+dmverity+encrypted` | `lz4hc` (encode) / `lz4` (decode) | LZ4-compressed EROFS + dm-verity representation stored inside a LUKS2/dm-crypt encrypted container. dm-verity metadata describes the decrypted EROFS + dm-verity representation |
+| `application/vnd.rdk.package.content.layer.v1.erofs.zstd+dmverity+encrypted` | `zstd` |  Zstd-compressed EROFS + dm-verity representation stored inside a LUKS2/dm-crypt encrypted container. Requires `CONFIG_EROFS_FS_ZIP_ZSTD` (Linux 6.x). dm-verity metadata describes the decrypted representation |
+| `application/vnd.rdk.package.content.layer.v1.erofs.nocmpr+dmverity+encrypted` | none | Uncompressed EROFS + dm-verity representation stored inside a LUKS2/dm-crypt encrypted container. dm-verity metadata describes the decrypted representation |
 
 The legacy umbrella type `application/vnd.rdk.package.content.layer.v1.erofs+dmverity` is deprecated and MUST NOT be produced by new tooling. Readers MAY accept it for backwards compatibility and treat it as `erofs.lz4+dmverity`.
 

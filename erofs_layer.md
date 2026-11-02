@@ -17,9 +17,9 @@ The content-layer media type encodes the compressor so headend and tooling can r
 | `application/vnd.rdk.package.content.layer.v1.erofs.lz4+dmverity`  | `lz4hc` (encode) / `lz4` (decode) | Baseline. Supported on every EROFS-enabled kernel. |
 | `application/vnd.rdk.package.content.layer.v1.erofs.zstd+dmverity` | `zstd` | Requires `CONFIG_EROFS_FS_ZIP_ZSTD` (Linux 6.x). |
 | `application/vnd.rdk.package.content.layer.v1.erofs.nocmpr+dmverity` | none | Uncompressed. Smallest CPU cost, largest image. |
-| `application/vnd.rdk.package.content.layer.v1.erofs.lz4+dmverity+encrypted` | `lz4hc` (encode) / `lz4` (decode) | LZ4-compressed EROFS + dm-verity representation stored inside a LUKS2/dm-crypt encrypted container. dm-verity metadata describes the decrypted EROFS + dm-verity representation |
-| `application/vnd.rdk.package.content.layer.v1.erofs.zstd+dmverity+encrypted` | `zstd` |  Zstd-compressed EROFS + dm-verity representation stored inside a LUKS2/dm-crypt encrypted container. Requires `CONFIG_EROFS_FS_ZIP_ZSTD` (Linux 6.x). dm-verity metadata describes the decrypted representation |
-| `application/vnd.rdk.package.content.layer.v1.erofs.nocmpr+dmverity+encrypted` | none | Uncompressed EROFS + dm-verity representation stored inside a LUKS2/dm-crypt encrypted container. dm-verity metadata describes the decrypted representation |
+| `application/vnd.rdk.package.content.layer.v1.erofs.lz4+dmverity+encrypted` | `lz4hc` (encode) / `lz4` (decode) | LZ4-compressed EROFS + dm-verity representation stored inside a LUKS2/dm-crypt encrypted container. dm-verity metadata describes the decrypted EROFS + dm-verity representation. Requires the encrypted-layer kernel options in [section 4](#4-kernel-configuration-requirements).|
+| `application/vnd.rdk.package.content.layer.v1.erofs.zstd+dmverity+encrypted` | `zstd` |  Zstd-compressed EROFS + dm-verity representation stored inside a LUKS2/dm-crypt encrypted container. Requires `CONFIG_EROFS_FS_ZIP_ZSTD` (Linux 6.x) and the encrypted-layer kernel options in [section 4](#4-kernel-configuration-requirements). dm-verity metadata describes the decrypted representation. |
+| `application/vnd.rdk.package.content.layer.v1.erofs.nocmpr+dmverity+encrypted` | none | Uncompressed EROFS + dm-verity representation stored inside a LUKS2/dm-crypt encrypted container. Requires the encrypted-layer kernel options in [section 4](#4-kernel-configuration-requirements). dm-verity metadata describes the decrypted representation. |
 
 The legacy umbrella type `application/vnd.rdk.package.content.layer.v1.erofs+dmverity` is deprecated and MUST NOT be produced by new tooling. Readers MAY accept it for backwards compatibility and treat it as `erofs.lz4+dmverity`.
 
@@ -46,11 +46,27 @@ Minimum `erofs-utils` version: **1.8.10**.
 | Symbol | Required for |
 | :--- | :--- |
 | `CONFIG_EROFS_FS=y` | All EROFS layers. |
-| `CONFIG_EROFS_FS_ZIP=y` | Any compressed layer (includes LZ4/LZ4HC decode). |
-| `CONFIG_EROFS_FS_ZIP_ZSTD=y` | `erofs.zstd+dmverity` layers. Linux 6.x. |
-| `CONFIG_DM_VERITY=y` | Verified mount of the appended hash tree. |
+| `CONFIG_EROFS_FS_ZIP=y` | Any compressed layer (includes LZ4/LZ4HC decode), encrypted or not.|
+| `CONFIG_EROFS_FS_ZIP_ZSTD=y` | `erofs.zstd+dmverity` and `erofs.zstd+dmverity+encrypted` layers. Linux 6.x. |
+| `CONFIG_BLK_DEV_DM=y` | Device-mapper core, required by dm-verity and dm-crypt (normally selected automatically by the options below). |
+| `CONFIG_DM_VERITY=y` | Verified mount of the appended hash tree, for all layers including encrypted ones. |
+| `CONFIG_CRYPTO_SHA256=y` | SHA-256 hashing used by dm-verity. | 
 
-`erofs.nocmpr` layers need only `CONFIG_EROFS_FS` plus `CONFIG_DM_VERITY`.
+Additional options for `+encrypted` layers, which are opened as a dm-crypt mapping before dm-verity is applied:
+
+| Symbol | Required for |
+| :--- | :--- |
+| `CONFIG_DM_CRYPT=y` | All `+encrypted` layers. Establishes the decrypted dm-crypt mapping over the LUKS2 data segment. |
+| `CONFIG_CRYPTO_XTS=y` | All `+encrypted` layers. XTS mode is used by both supported ciphers (`aes-xts-plain64`, `serpent-xts-plain64`). |
+| `CONFIG_CRYPTO_AES=y` | Layers encrypted with `aes-xts-plain64` (recommended cipher). An architecture-optimised AES implementation is RECOMMENDED on constrained targets. |
+| `CONFIG_CRYPTO_SERPENT=y` | Layers encrypted with `serpent-xts-plain64` only. |
+
+A device that accepts encrypted layers MUST support `aes-xts-plain64`. Support for `serpent-xts-plain64` is OPTIONAL. A consumer MUST reject a layer encrypted with a cipher its kernel does not provide, as reported by the LUKS2 header or the `org.rdk.package.content.dmcrypt.cipher` annotation. 
+
+Unencrypted `erofs.nocmpr+dmverity` layers need only `CONFIG_EROFS_FS` plus `CONFIG_DM_VERITY` (with the options it depends on). `erofs.nocmpr+dmverity+encrypted` layers additionally need the encrypted-layer options above.
+
+
+
 
 ## 5. Feature & Compatibility Matrix
 

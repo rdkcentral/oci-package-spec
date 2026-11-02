@@ -603,7 +603,7 @@ Annotation values are strings. Numeric values are decimal strings.
 | :--- | :--- | :--- |
 | `org.rdk.package.content.dmcrypt.keys.jwe` | Yes | Base64-encoded JWE (General JSON serialization) wrapping the LUKS2 master key for one or more recipients. See [JWE Token Format](#jwe-token-format) and [Recipients and Key Selection](#recipients-and-key-selection). |
 | `org.rdk.package.content.dmcrypt.cipher` | No | dm-crypt cipher string in the form `<cipher>-<mode>-<iv_generation>`, taken from the LUKS2 header. Supported values: `aes-xts-plain64` (AES-256 XTS, recommended) and `serpent-xts-plain64` (Serpent-256 XTS, alternative). |
-| `org.rdk.package.content.dmcrypt.salt` | No | Base64-encoded 32-byte PBKDF salt of LUKS2 keyslot 0. Also present in the LUKS2 header, but the annotation lets a consumer verify the algorithm before downloading the blob and cross-check it at decryption time. |
+| `org.rdk.package.content.dmcrypt.salt` | No | Base64-encoded 32-byte PBKDF salt of LUKS2 keyslot 0. Informational; when present, a consumer can cross-check it against the LUKS2 header at decryption time. The salt does not identify the cipher or PBKDF algorithm. |
 | `org.rdk.package.content.dmcrypt.keysize` | No | Key size of the LUKS2 container in bits, for example `512` for AES-XTS (two 256-bit) keys. Informational. |
 | `org.rdk.package.content.dmcrypt.type` | No | LUKS format version. Always `luks2` for new packages. Informational. |
 
@@ -767,9 +767,9 @@ A producer encrypting a package MUST:
 A consumer MUST verify the signature (when a signature manifest is present, see [Signing Order](#signing-order)) and validate the layer `digest` and `size` before decryption. It then follows the processing order in [dm-verity Metadata for Encrypted EROFS Layers](#dm-verity-metadata-for-encrypted-erofs-layers). When unwrapping the master key, it MUST select the recipient entry as described in [Recipients and Key Selection](#recipients-and-key-selection).
 
 
-### Reference Implementation (Informative)
+### Illustrative Producer Flow (Informative)
 
-This section is informative and not part of the format requirements. The reference tool, [bolt-tool](https://github.com/rdkcentral/bolt-tools/blob/main/bolt/docs/make.md), implements the producer steps as follows:
+This section is informative and not part of the format requirements. An illustrative producer performs the following steps:
 
 * generates the 512-bit master key in-process
 * invokes `cryptsetup luksFormat` to create the LUKS2 container

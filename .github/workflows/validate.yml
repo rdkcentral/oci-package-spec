@@ -28,3 +28,6 @@ jobs:
 
       - name: Validate test fixtures
         run: npx --yes ajv-cli@5 validate -s schema/v1/package.schema.json -d "test/fixtures/valid-*.json" --spec=draft2020
+
+      - name: Check invalid fixtures are rejected
+        run: npx --yes ajv-cli@5 test -s schema/v1/package.schema.json -d "test/fixtures/invalid-*.json" --invalid --spec=draft2020

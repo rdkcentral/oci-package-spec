@@ -183,6 +183,10 @@ _Examples_
 The package version, this must consist of 1 to 4 numbers separated by periods (`.`). Numbers must not
 include a leading zero. For example, `2.01` is not allowed; however, `0.2`, `2.0.1`, and `2.10` are allowed.
 
+The first three numbers must be in the range `0` to `999999999`. The optional fourth number must be in the range
+`0` to `4294967294` (`UINT32_MAX - 1`), which allows it to hold, for example, a Unix epoch timestamp in seconds
+(valid until 2106-02-07). The maximum allowed version is therefore `999999999.999999999.999999999.4294967294`.
+
 _Examples_
 
 ```json
@@ -194,6 +198,12 @@ _Examples_
 ```json
 {
   "version": "0.1.20"
+}
+```
+
+```json
+{
+  "version": "1.2.3.1763030400"
 }
 ```
 
